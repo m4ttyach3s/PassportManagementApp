@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.LinearGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="697.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progetto.packController.ControllerDipendente">
+   <children>
+      <Arc layoutX="147.0" layoutY="376.0" length="270.0" radiusX="555.0" radiusY="596.0" startAngle="41.6" stroke="#ffffff00" strokeLineCap="ROUND" strokeLineJoin="BEVEL" strokeMiterLimit="50.0" strokeType="INSIDE" type="ROUND">
+         <fill>
+            <LinearGradient endX="1.0" endY="1.0" startX="0.13064133016627077" startY="1.0">
+               <stops>
+                  <Stop>
+                     <color>
+                        <Color green="0.4000000059604645" blue="0.25882354378700256" />
+                     </color>
+                  </Stop>
+                  <Stop offset="0.006711409395973154">
+                     <color>
+                        <Color green="0.4000000059604645" blue="0.25882354378700256" />
+                     </color>
+                  </Stop>
+                  <Stop offset="0.44630872483221473">
+                     <color>
+                        <Color red="0.30588236451148987" green="0.572549045085907" blue="0.47843137383461" />
+                     </color>
+                  </Stop>
+                  <Stop offset="1.0">
+                     <color>
+                        <Color red="1.0" green="1.0" blue="1.0" />
+                     </color>
+                  </Stop>
+               </stops>
+            </LinearGradient>
+         </fill>
+      </Arc>
+      <Line endX="482.5667724609375" endY="-7.62939453125E-6" layoutX="449.0" layoutY="18.0" startX="-148.5">
+         <stroke>
+            <LinearGradient endX="1.0" endY="1.0" startX="0.29691211401425177" startY="1.0">
+               <stops>
+                  <Stop>
+                     <color>
+                        <Color red="1.0" green="1.0" blue="1.0" />
+                     </color>
+                  </Stop>
+                  <Stop offset="0.006711409395973154">
+                     <color>
+                        <Color red="1.0" green="1.0" blue="1.0" />
+                     </color>
+                  </Stop>
+                  <Stop offset="1.0">
+                     <color>
+                        <Color />
+                     </color>
+                  </Stop>
+               </stops>
+            </LinearGradient>
+         </stroke>
+      </Line>
+      <Label alignment="CENTER" layoutX="-4.0" layoutY="8.0" prefHeight="18.0" prefWidth="304.0" text="Portale Gestione Passaporti" textFill="WHITE">
+         <font>
+            <Font name="Azonix" size="14.0" />
+         </font>
+      </Label>
+      <Rectangle arcHeight="15.0" arcWidth="15.0" fill="#76a997" height="26.0" layoutX="300.0" layoutY="40.0" stroke="#ffffff00" strokeType="INSIDE" width="328.0" />
+      <Label alignment="CENTER" layoutX="-4.0" layoutY="42.0" prefHeight="17.0" prefWidth="949.0" text="Inserimento slot delle prenotazioni" textFill="WHITE">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="16.0" />
+         </font>
+      </Label>
+      <Label layoutX="146.0" layoutY="102.0" prefHeight="23.0" prefWidth="118.0" text="Scegli il giorno:">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="16.0" />
+         </font>
+      </Label>
+      <DatePicker fx:id="datePickerSlot" layoutX="295.0" layoutY="102.0" prefHeight="26.0" prefWidth="342.0" promptText="es.: GG/MM/AAAA" />
+      <Button fx:id="confermaDataSlot" layoutX="670.0" layoutY="101.0" mnemonicParsing="false" onAction="#confermaSlotData" prefHeight="28.0" prefWidth="115.0" style="-fx-background-color: #76A997;" text="Conferma">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="13.0" />
+         </font>
+      </Button>
+      <ScrollPane fx:id="scrollpaneSlot" layoutX="90.0" layoutY="150.0" prefHeight="175.0" prefWidth="750.0">
+         <content>
+            <VBox fx:id="vboxSlot" prefHeight="175.0" prefWidth="732.0" />
+         </content>
+      </ScrollPane>
+      <Accordion layoutX="90.0" layoutY="375.0" prefHeight="175.0" prefWidth="750.0">
+         <panes>
+          <TitledPane fx:id="anteprimaSlot" animated="false" prefHeight="300.0" prefWidth="638.0" text="Anteprima slot">
+               <content>
+                  <ScrollPane fx:id="scrollpaneAccSlot" prefHeight="200.0" prefWidth="200.0">
+                     <content>
+                        <VBox fx:id="vboxAccSlot" prefHeight="193.0" prefWidth="731.0" />
+                     </content>
+                  </ScrollPane>
+               </content>
+          </TitledPane>
+         </panes>
+      </Accordion>
+      <Button fx:id="indietroSlot" layoutX="147.0" layoutY="615.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="115.0" text="Indietro">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="13.0" />
+         </font>
+      </Button>
+      <Button fx:id="caricaSlot" layoutX="407.0" layoutY="335.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="115.0" style="-fx-background-color: #76A997;" text="Carica Slot">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="13.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>

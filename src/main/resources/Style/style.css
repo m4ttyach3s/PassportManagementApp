@@ -1,0 +1,9 @@
+.button{
+    -fx-background-color: transparent
+}
+.button:hover{
+    -fx-border-color: #aaae3a;
+}
+.button:focused{
+    -fx-background-color: -fx-shadow-highlight-color, -fx-inner-border, -fx-body-color;
+}

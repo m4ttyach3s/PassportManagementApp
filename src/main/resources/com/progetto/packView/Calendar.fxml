@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="750.0" prefWidth="950.0" style="-fx-background-color: #f2fafc;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progetto.packController.ControllerCittadino">
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#76a997" height="28.0" layoutX="708.0" layoutY="7.0" stroke="TRANSPARENT" strokeType="INSIDE" width="218.0" />
+   <Line fx:id="line2" endX="242.0" layoutX="456.0" layoutY="19.0" startX="-148.5" />
+   <Label alignment="CENTER" layoutX="10.0" layoutY="11.0" prefHeight="18.0" prefWidth="304.0" text="Portale Gestione Passaporti">
+      <font>
+         <Font name="Azonix" size="14.0" />
+      </font>
+   </Label>
+    <FlowPane fx:id="calendar" hgap="10.0" layoutX="51.0" layoutY="99.0" prefHeight="495.0" prefWidth="863.0" vgap="5.0" />
+    <HBox alignment="CENTER" layoutX="261.0" layoutY="25.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
+        <children>
+            <Button fx:id="backOne" mnemonicParsing="false" onAction="#backOneMonth" text="&lt;" />
+            <Text fx:id="year" strokeType="OUTSIDE" strokeWidth="0.0" text="####">
+                <font>
+                    <Font size="22.0" />
+                </font>
+            </Text>
+            <Text fx:id="month" strokeType="OUTSIDE" strokeWidth="0.0" text="####">
+                <font>
+                    <Font size="22.0" />
+                </font>
+            </Text>
+            <Button mnemonicParsing="false" onAction="#forwardOneMonth" text="&gt;" />
+        </children>
+    </HBox>
+    <HBox alignment="CENTER" layoutX="-9.0" layoutY="57.0" prefHeight="44.0" prefWidth="959.0" spacing="88.75">
+        <children>
+         <Label prefHeight="17.0" prefWidth="64.0" text="Dom" />
+         <Label prefHeight="17.0" prefWidth="42.0" text="Lun" />
+         <Label prefHeight="17.0" prefWidth="30.0" text="Mar" />
+         <Label prefHeight="17.0" prefWidth="34.0" text="Mer" />
+         <Label text="Gio" />
+         <Label text="Ven" />
+         <Label prefHeight="17.0" prefWidth="23.0" text="Sab" />
+        </children>
+        <padding>
+            <Insets right="9.0" />
+        </padding>
+    </HBox>
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="46.0" layoutX="54.0" layoutY="619.0" stroke="BLACK" strokeType="INSIDE" width="857.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#979797" height="20.0" layoutX="68.0" layoutY="628.0" stroke="BLACK" strokeType="INSIDE" width="44.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1fff46" height="20.0" layoutX="291.0" layoutY="631.0" stroke="BLACK" strokeType="INSIDE" width="44.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff561f" height="20.0" layoutX="477.0" layoutY="630.0" stroke="BLACK" strokeType="INSIDE" width="44.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#fff51f" height="20.0" layoutX="674.0" layoutY="630.0" stroke="BLACK" strokeType="INSIDE" width="44.0" />
+   <Label layoutX="120.0" layoutY="631.0" prefHeight="17.0" prefWidth="157.0" text="Giorno non permesso">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font></Label>
+   <Label layoutX="343.0" layoutY="631.0" prefHeight="17.0" prefWidth="157.0" text="Slot disponibile">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font></Label>
+   <Label layoutX="728.0" layoutY="633.0" prefHeight="17.0" prefWidth="179.0" text="Slot non ancora assegnato">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font></Label>
+   <Label layoutX="531.0" layoutY="633.0" prefHeight="17.0" prefWidth="179.0" text="Slot non disponibile">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font></Label>
+   <Button layoutX="55.0" layoutY="683.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="125.0" text="Indietro">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font></Button>
+   <Label alignment="CENTER" layoutX="56.0" layoutY="594.0" prefHeight="23.0" prefWidth="854.0" text="L E G E N D A">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="15.0" />
+      </font>
+   </Label>
+   <Button layoutX="786.0" layoutY="683.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="125.0" text="Conferma">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font>
+   </Button>
+   <Label layoutX="714.0" layoutY="12.0" text="Tempo rimasto:" textFill="WHITE">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="13.0" />
+      </font>
+   </Label>
+   <Label fx:id="labelTempoRimasto" layoutX="811.0" layoutY="13.0" prefHeight="17.0" prefWidth="106.0" textFill="WHITE">
+      <font>
+         <Font name="Kohinoor Devanagari Regular" size="12.0" />
+      </font>
+   </Label>
+
+</AnchorPane>

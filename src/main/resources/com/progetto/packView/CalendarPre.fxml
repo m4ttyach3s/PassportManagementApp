@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progetto.packController.ControllerCittadino">
+   <children>
+      <Button fx:id="buttonRilascio" layoutX="257.0" layoutY="143.0" mnemonicParsing="false" text="Rilascio" />
+      <Button fx:id="buttonRitiro" layoutX="257.0" layoutY="214.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="65.0" text="Ritiro" />
+   </children>
+</AnchorPane>
