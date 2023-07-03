@@ -6,9 +6,9 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,6 +24,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -113,6 +114,9 @@ public class ControllerCittadino implements Initializable {
     private Button buttonRitiro = new Button();
 
     @FXML
+    private Button indietroButtonPrenotazione = new Button();
+
+    @FXML
     private RadioButton radioButtonPasswordModifica = new RadioButton();
     private static int count = 0;
     ZonedDateTime dateFocus; // Focus date for the calendar
@@ -129,11 +133,20 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button backOne = new Button();
 
-    private static final int START_TIME = 5 * 60; // 5 minutes in seconds
+    private static final int START_TIME = 3; // 5 minutes in seconds
     private int remainingTime;
-    private Label labelTempoRimasto;
+    @FXML
+    private Label labelTempoRimasto = new Label();
     private Timeline timeline;
+    private String causaPassaporto;
+    private boolean isTimerOver = false;
 
+    @FXML
+    private Label labelGrigia = new Label();
+    private boolean isPrenotazioneClicked = false;
+    private boolean stageSetBack = false;
+
+    // -------- sezione apertura FXML ----------
     //TODO
     //  aggiungere timestamp
     @FXML
@@ -179,6 +192,11 @@ public class ControllerCittadino implements Initializable {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+
+        if(stageSetBack){
+            startAlert("test");
+        }
+
     }
 
     @FXML
@@ -190,6 +208,83 @@ public class ControllerCittadino implements Initializable {
         stage.setResizable(false);
         stage.show();
     }
+
+
+    // TODO
+    //  creare la classe Calendario con i pulsanti per gli orari
+    @FXML
+    void openPortalePrenotazioni(ActionEvent nP) throws IOException, SQLException {
+        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/CalendarPre.fxml"));
+        Stage stage = (Stage) ((Node) nP.getSource()).getScene().getWindow();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+
+    private void openCalendar(ActionEvent e) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
+        Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    // ---------- fine FXML
+
+    // ---------- Sezione ALERT ------------
+    private void startAlertAnnullamento() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore!");
+        alert.setHeaderText("Operazione non completata!");
+        alert.setContentText("La tua prenotazione è già stata annullata oppure risulta esserci qualche problema.\nProva ad uscire e a rientrare dal portale.");
+        alert.showAndWait();
+    }
+
+    private void startSuccessAnnullamento() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Confermato!");
+        alert.setHeaderText("Operazione completata");
+        alert.setContentText("Operazione completata con successo! La tua prenotazione è stata annullata");
+        alert.showAndWait();
+    }
+
+    private void startPDFSuccess() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Confermato!");
+        alert.setHeaderText("Operazione completata");
+        alert.setContentText("Operazione completata con successo! Troverà il pdf scaricato nella cartella Download.");
+        alert.showAndWait();
+    }
+
+
+    private void startSuccess(String text) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Confermato!");
+        alert.setHeaderText("Operazione completata");
+        alert.setContentText("Operazione completata con successo! Al prossimo login i nuovi dati saranno effettivi");
+        alert.showAndWait();
+
+        if(text.equals("Mail")) {
+            hideMail();
+        } else {
+            hidePwd();
+        }
+    }
+
+    private void startAlert(String string) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Errore!");
+            alert.setHeaderText("Operazione non concessa");
+            alert.setContentText("Il campo " + string + " non è corretto.");
+            alert.showAndWait();
+    }
+// ------ fine ALERT ------
+
+
+    // --------- sezione METODI ---------
 
     //      DVDFCC01D23M150F
     @FXML
@@ -222,63 +317,49 @@ public class ControllerCittadino implements Initializable {
             Button annullaButton = new Button("Annulla");
 
             dettagliButton.setOnAction(event -> {
-                    List<String> lista = new ArrayList<String>();
-                    lista.add(id);
-                    lista.add(citta);
-                    lista.add(String.valueOf(ora));
-                    lista.add(String.valueOf(giorno));
-                    lista.add(servizio);
-                    lista.add(causaR);
-                    lista.add(this.model.getNome());
-                    lista.add(this.model.getCognome());
-                    lista.add(this.model.getId());
-                    this.model.makePDF(lista, servizio, causaR);
-                    startPDFSuccess();
+                List<String> lista = new ArrayList<>();
+                lista.add(id);
+                lista.add(citta);
+                lista.add(String.valueOf(ora));
+                lista.add(String.valueOf(giorno));
+                lista.add(servizio);
+                lista.add(causaR);
+                lista.add(this.model.getNome());
+                lista.add(this.model.getCognome());
+                lista.add(this.model.getId());
+                this.model.makePDF(lista, servizio, causaR);
+                startPDFSuccess();
             });
 
-                annullaButton.setOnAction(event -> {
-                    try {
-                        boolean annullaResult = this.model.annullaPrenotazioneAttive(id,giorno,ora,codSede);
-                        if (annullaResult) {
-                            startSuccessAnnullamento();
-                            PrenotazioniAttive.setExpanded(false);
-                            this.model.getPrenotazioniAttive();
-                        } else {
-                            startAlertAnnullamento();
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
+            annullaButton.setOnAction(event -> {
+                try {
+                    boolean annullaResult = this.model.annullaPrenotazioneAttive(id,giorno,ora,codSede);
+                    if (annullaResult) {
+                        startSuccessAnnullamento();
+                        PrenotazioniAttive.setExpanded(false);
+                        this.model.getPrenotazioniAttive();
+                    } else {
+                        startAlertAnnullamento();
                     }
-                });
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
-                Line line = new Line(0, 0, 790, 0); // Horizontal line
+            Line line = new Line(0, 0, 790, 0); // Horizontal line
 
-                HBox entryBox = new HBox(idLabel, cittaLabel, giornoOraLabel, servizioLabel, causaRilascioLabel,
-                        dettagliButton, annullaButton);
+            HBox entryBox = new HBox(idLabel, cittaLabel, giornoOraLabel, servizioLabel, causaRilascioLabel,
+                    dettagliButton, annullaButton);
 
-                entryBox.setSpacing(15);
-                entryBox.setAlignment(Pos.CENTER);
-                entryBox.setSnapToPixel(true);
-                vboxpattive.getChildren().addAll(entryBox, line);
-            }
+            entryBox.setSpacing(15);
+            entryBox.setAlignment(Pos.CENTER);
+            entryBox.setSnapToPixel(true);
+            vboxpattive.getChildren().addAll(entryBox, line);
+        }
         ScrollPaneAttive.setContent(vboxpattive);
     }
 
-    private void startAlertAnnullamento() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Errore!");
-        alert.setHeaderText("Operazione non completata!");
-        alert.setContentText("La tua prenotazione è già stata annullata oppure risulta esserci qualche problema.\nProva ad uscire e a rientrare dal portale.");
-        alert.showAndWait();
-    }
 
-    private void startSuccessAnnullamento() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Confermato!");
-        alert.setHeaderText("Operazione completata");
-        alert.setContentText("Operazione completata con successo! La tua prenotazione è stata annullata");
-        alert.showAndWait();
-    }
 
 
     @FXML
@@ -303,7 +384,7 @@ public class ControllerCittadino implements Initializable {
             Button dettagliButton = new Button("PDF Dettagli");
 
             dettagliButton.setOnAction(event -> {
-                List<String> lista = new ArrayList<String>();
+                List<String> lista = new ArrayList<>();
                 lista.add(id); // 0
                 lista.add(citta); // 1
                 lista.add(String.valueOf(ora)); // 2
@@ -327,25 +408,6 @@ public class ControllerCittadino implements Initializable {
         ScrollPanePassate.setContent(vboxpassate);
     }
 
-    private void startPDFSuccess() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Confermato!");
-        alert.setHeaderText("Operazione completata");
-        alert.setContentText("Operazione completata con successo! Troverà il pdf scaricato nella cartella Download.");
-        alert.showAndWait();
-    }
-
-    // TODO
-    //  creare la classe Calendario con i pulsanti per gli orari
-    @FXML
-    void openPortalePrenotazioni(ActionEvent nP) throws IOException, SQLException {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/CalendarPre.fxml"));
-        Stage stage = (Stage) ((Node) nP.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-    }
 
     private void checkEditPwdButton() {
         isEditPWD = !isEditPWD;
@@ -425,28 +487,6 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
-    private void startSuccess(String text) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Confermato!");
-        alert.setHeaderText("Operazione completata");
-        alert.setContentText("Operazione completata con successo! Al prossimo login i nuovi dati saranno effettivi");
-        alert.showAndWait();
-
-        if(text.equals("Mail")) {
-            hideMail();
-        } else {
-            hidePwd();
-        }
-    }
-
-    private void startAlert(String string) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Errore!");
-        alert.setHeaderText("Operazione non concessa");
-        alert.setContentText("Il campo "+string+" non è corretto.");
-        alert.showAndWait();
-    }
-
     private void checkHiddenPwd() {
         isPWDHidden = !isPWDHidden;
         if(isPWDHidden){
@@ -502,7 +542,6 @@ public class ControllerCittadino implements Initializable {
     private void drawCalendar(String text) throws SQLException {
         year.setText(String.valueOf(dateFocus.getYear())); // Set the year text
         month.setText(dateFocus.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN).toUpperCase());
-
         // Dimensions and styling for the calendar elements
         double calendarWidth = calendar.getPrefWidth();
         double calendarHeight = calendar.getPrefHeight();
@@ -537,7 +576,7 @@ public class ControllerCittadino implements Initializable {
                     int currentDate = calculatedDate - dateOffset; // Calculate the current date of the month
                     if (currentDate <= monthMaxDate) { // Check if the current date is within the valid range
                         Label data = new Label(String.valueOf(currentDate));
-                        data.setStyle("-fx-background-color: #f0fafc");
+                        data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
                         data.setPrefWidth(rectangleWidth);
                         data.setAlignment(Pos.CENTER);
                         data.setTranslateY(-(rectangleHeight)/2 - 5);
@@ -603,6 +642,13 @@ public class ControllerCittadino implements Initializable {
                             && today.getDayOfMonth() == currentDate) {
                         rectangle.setFill(Paint.valueOf("#add8e6"));
                     }
+                } else {
+                    Label data = new Label("    ");
+                    data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
+                    data.setPrefWidth(rectangleWidth);
+                    data.setAlignment(Pos.CENTER);
+                    data.setTranslateY(-(rectangleHeight)/2 - 5);
+                    stackPane.getChildren().add(data);
                 }
                 calendar.getChildren().add(stackPane); // Add the stack pane to the calendar grid
             }
@@ -615,10 +661,15 @@ public class ControllerCittadino implements Initializable {
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(1), event -> {
                     remainingTime--;
-                    updateTimerLabel();
+                    String j = updateTimerLabel();
+                    labelTempoRimasto.setText(j);
 
                     if (remainingTime <= 0) {
-                        stopTimer();
+                        try {
+                            stopTimer();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 })
         );
@@ -626,17 +677,18 @@ public class ControllerCittadino implements Initializable {
         timeline.play();
     }
 
-    private void updateTimerLabel() {
+    private String updateTimerLabel() {
         int minutes = remainingTime / 60;
         int seconds = remainingTime % 60;
-        String formattedTime = String.format("%02d:%02d", minutes, seconds);
-        labelTempoRimasto.setText(formattedTime);
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
-    private void stopTimer() {
+    private void stopTimer() throws IOException {
         timeline.stop();
+        isTimerOver = true;
+        indietroButtonPrenotazione.fire();
+        stageSetBack = true;
     }
-
 
     private String trasformaOrario(String string) {
         String rs = new String();
@@ -662,6 +714,9 @@ public class ControllerCittadino implements Initializable {
         return rs;
     }
 
+    // ---------- fine METODI
+
+    // -- !! INITIALIZE !! --
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -689,15 +744,12 @@ public class ControllerCittadino implements Initializable {
 
 
 
-        buttonRilascio.setOnAction(e->{
+        buttonRilascio.setOnAction(e ->{
             try {
                 openCalendar(e);
+                causaPassaporto = buttonRilascio.getText();
+                isPrenotazioneClicked = true;
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-            try {
-                drawCalendar(buttonRilascio.getText());
-            } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -705,31 +757,34 @@ public class ControllerCittadino implements Initializable {
         buttonRitiro.setOnAction(e->{
             try {
                 openCalendar(e);
+                causaPassaporto = buttonRitiro.getText();
+                isPrenotazioneClicked = true;
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            try {
-                drawCalendar(buttonRitiro.getText());
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
         });
 
-        Platform.runLater(() -> {
+            Platform.runLater(() -> {
+                if (isTimerOver || indietroButtonPrenotazione.isPressed()) {
+                    return;
+                }
+                try {
+                    drawCalendar(causaPassaporto); // Call drawCalendar once on the JavaFX Application Thread
+                    startTimer();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+        if(indietroButtonPrenotazione.isPressed()){
             try {
-                drawCalendar("Ritiro"); // Call drawCalendar once on the JavaFX Application Thread
-            } catch (SQLException e) {
+                stopTimer();
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }
+
     }
 
-    private void openCalendar(ActionEvent e) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
-        Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-    }
+
 }
