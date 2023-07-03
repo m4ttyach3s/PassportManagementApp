@@ -35,4 +35,13 @@ public class Addetto {
     public void setCodiceSede(String codiceSede) {
         this.codiceSede = codiceSede;
     }
+
+    @Override
+    public String toString() {
+        return "Addetto{" +
+                "matricola='" + matricola + '\'' +
+                ", codiceSede='" + codiceSede + '\'' +
+                ", isResponsabile=" + isResponsabile +
+                '}';
+    }
 }

@@ -6,9 +6,9 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,7 +24,6 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -39,6 +38,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerCittadino implements Initializable {
     private static final String BACK_COLOR = "-fx-background-color: #c2c0c0";
@@ -118,6 +118,17 @@ public class ControllerCittadino implements Initializable {
 
     @FXML
     private RadioButton radioButtonPasswordModifica = new RadioButton();
+
+    @FXML
+    private ChoiceBox<String> comboBoxServizio = new ChoiceBox<>();
+    @FXML
+    private ChoiceBox<String> comboBoxSede = new ChoiceBox<>();
+    @FXML
+    private Button confermaPrenotazioneServizioSede = new Button();
+
+    @FXML
+    private Button scegliServizio = new Button();
+
     private static int count = 0;
     ZonedDateTime dateFocus; // Focus date for the calendar
     ZonedDateTime today; // Current date
@@ -133,7 +144,7 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button backOne = new Button();
 
-    private static final int START_TIME = 3; // 5 minutes in seconds
+    private static final int START_TIME = 5*60; // 5 minutes in seconds
     private int remainingTime;
     @FXML
     private Label labelTempoRimasto = new Label();
@@ -145,6 +156,8 @@ public class ControllerCittadino implements Initializable {
     private Label labelGrigia = new Label();
     private boolean isPrenotazioneClicked = false;
     private boolean stageSetBack = false;
+    private static String servPP = new String();
+    private static String numSedePP = new String();
 
     // -------- sezione apertura FXML ----------
     //TODO
@@ -193,10 +206,6 @@ public class ControllerCittadino implements Initializable {
         stage.setResizable(false);
         stage.show();
 
-        if(stageSetBack){
-            startAlert("test");
-        }
-
     }
 
     @FXML
@@ -214,7 +223,7 @@ public class ControllerCittadino implements Initializable {
     //  creare la classe Calendario con i pulsanti per gli orari
     @FXML
     void openPortalePrenotazioni(ActionEvent nP) throws IOException, SQLException {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/CalendarPre.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/prenotazione-intermedia-view.fxml"));
         Stage stage = (Stage) ((Node) nP.getSource()).getScene().getWindow();
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -360,8 +369,6 @@ public class ControllerCittadino implements Initializable {
     }
 
 
-
-
     @FXML
     void prenotazioniPassate() throws SQLException {
         VBox vboxpassate = new VBox();
@@ -371,7 +378,7 @@ public class ControllerCittadino implements Initializable {
         ResultSet rs = this.model.getPrenotazioniPassate();
         while (rs.next()) {
             Label idLabel = new Label("ID Prenotazione: " + rs.getString("ID"));
-            Label causaRilascioLabel = new Label("Causale: " +rs.getString("causaRilascio"));
+            Label causaRilascioLabel = new Label("Causale: Ritiro passaporto");
             Label servizioLabel = new Label("Servizio: " +rs.getString("servizio"));
 
             String id = rs.getString("ID");
@@ -379,7 +386,6 @@ public class ControllerCittadino implements Initializable {
             Time ora = rs.getTime("ora");
             Date giorno = rs.getDate("giorno");
             String servizio = rs.getString("servizio");
-            String causaR = rs.getString("causaRilascio");
 
             Button dettagliButton = new Button("PDF Dettagli");
 
@@ -390,11 +396,11 @@ public class ControllerCittadino implements Initializable {
                 lista.add(String.valueOf(ora)); // 2
                 lista.add(String.valueOf(giorno)); // 3
                 lista.add(servizio); // 4
-                lista.add(causaR); // 5
+                lista.add("");
                 lista.add(this.model.getNome()); // 6
                 lista.add(this.model.getCognome()); // 7
                 lista.add(this.model.getId()); // 8
-                this.model.makePDF(lista, servizio, causaR);
+                this.model.makePDF(lista, servizio, "Ritiro passaporto");
                 startPDFSuccess();
             });
 
@@ -518,7 +524,7 @@ public class ControllerCittadino implements Initializable {
     void backOneMonth(ActionEvent event) throws SQLException {
         dateFocus = dateFocus.minusMonths(1); // Move focus date one month back
         calendar.getChildren().clear(); // Clear the calendar grid
-        drawCalendar(buttonRitiro.getText()); // Draw the updated calendar
+        drawCalendar(); // Draw the updated calendar
         updateButtonStatus(backOne); // Update the button status after changing the date
     }
 
@@ -526,7 +532,7 @@ public class ControllerCittadino implements Initializable {
     void forwardOneMonth(ActionEvent event) throws SQLException {
         dateFocus = dateFocus.plusMonths(1); // Move focus date one month forward
         calendar.getChildren().clear(); // Clear the calendar grid
-        drawCalendar(buttonRitiro.getText()); // Draw the updated calendar
+        drawCalendar(); // Draw the updated calendar
         updateButtonStatus(backOne); // Update the button status after changing the date
     }
 
@@ -539,9 +545,10 @@ public class ControllerCittadino implements Initializable {
         return !dateFocus.isBefore(initialDate);
     }
 
-    private void drawCalendar(String text) throws SQLException {
+    private void drawCalendar() throws SQLException {
         year.setText(String.valueOf(dateFocus.getYear())); // Set the year text
         month.setText(dateFocus.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN).toUpperCase());
+
         // Dimensions and styling for the calendar elements
         double calendarWidth = calendar.getPrefWidth();
         double calendarHeight = calendar.getPrefHeight();
@@ -568,55 +575,75 @@ public class ControllerCittadino implements Initializable {
                 rectangle.setWidth(rectangleWidth);
                 double rectangleHeight = (calendarHeight / 6) - strokeWidth - spacingV; // Calculate the height of the rectangle
                 rectangle.setHeight(rectangleHeight);
+
                 stackPane.getChildren().add(rectangle); // Add the rectangle to the stack pane
 
                 int calculatedDate = (j + 1) + (7 * i); // Calculate the date for the current cell
-
+                Label data = new Label();
                 if (calculatedDate > dateOffset) { // Check if the date is valid for the current month
                     int currentDate = calculatedDate - dateOffset; // Calculate the current date of the month
                     if (currentDate <= monthMaxDate) { // Check if the current date is within the valid range
-                        Label data = new Label(String.valueOf(currentDate));
+
+                        data.setText(String.valueOf(currentDate));
                         data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
                         data.setPrefWidth(rectangleWidth);
                         data.setAlignment(Pos.CENTER);
-                        data.setTranslateY(-(rectangleHeight)/2 - 5);
+                        data.setTranslateY(-(rectangleHeight) / 2 - 5);
                         stackPane.getChildren().add(data);
 
                         int cYear = dateFocus.getYear();
                         int cMonth = dateFocus.getMonthValue();
                         LocalDate dateC = LocalDate.of(cYear, cMonth, currentDate);
 
-                        ResultSet rs = this.model.getSlots(dateC);
-                        boolean hasSlots = false; // Flag to check if there are slots
+                        ResultSet rs = this.model.getSlots(dateC, numSedePP, servPP);
+                        int hasAllZeros = this.model.getZeroSlot(dateC, numSedePP, servPP);
+                        boolean hasSlots = rs.next(); // Flag to check if there are slots
                         boolean isEmpty = false;
 
                         // if numero posti <= 0 --> rosso
                         // if data non c'è giallo
-                        if (!rs.next()) {
-                            rectangle.setFill(Paint.valueOf("#f7ce5c")); //giallo
+                        if (!hasSlots) {
+                            rectangle.setFill(Paint.valueOf("#f7ce5c")); // giallo
                         } else {
-                            if(rs.getInt(2) <=0){
-                                isEmpty = true;
-                            }
-                            hasSlots = true;
-                            rectangle.setFill(Paint.valueOf("#6ebf5a")); //verde
+                            rectangle.setFill(Paint.valueOf("#6ebf5a")); // verde
+                            rectangle.toBack();
                         }
 
                         VBox buttonContainer = new VBox(); // VBox to hold the buttons vertically
+                        int counter = 0;
+                        if (hasSlots) {
+                            do {
+                                Button button = new Button(trasformaOrario(rs.getString(1)));
+                                button.setText(trasformaOrario(rs.getString(1)));
+                                button.setMaxWidth(rectangleWidth - strokeWidth); // Set max width to fit within rectangle
 
-                        while (rs.next()) {
-                            Button button = new Button(trasformaOrario(rs.getString(1)));
-                            button.setMaxWidth(rectangleWidth - strokeWidth); // Set max width to fit within rectangle
-                            buttonContainer.setSpacing(5);
-                            buttonContainer.getChildren().add(button); // Add the button to the VBox
-                            buttonContainer.setStyle("-fx-background-color: #6ebf5a");
-                            if(rs.getInt(2)<=0){
-                                button.setStyle("-fx-background-color: #f76363; -fx-border-color: black; -fx-border-width: 1px;");
-                                button.setMouseTransparent(true);
-                            } else {
-                                button.setStyle("-fx-background-color: #6ebf5a; -fx-border-color: black; -fx-border-width: 1px;");
-                                button.setTextFill(Paint.valueOf("#ffffff"));
-                            }
+                                button.setOnAction(e -> {
+                                    System.out.println(button.getText());
+                                });
+
+                                int slotsNumber = rs.getInt(2);
+
+                                if (slotsNumber <= 0) {
+                                    counter++;
+                                    button.setStyle("-fx-background-color: #f76363; -fx-border-color: black; -fx-border-width: 1px;");
+                                    button.setMouseTransparent(true);
+                                    button.toFront();
+                                } else {
+                                    button.setStyle("-fx-background-color: #6ebf5a; -fx-border-color: black; -fx-border-width: 1px;");
+                                    button.setTextFill(Paint.valueOf("#ffffff"));
+                                }
+
+                                if(counter == hasAllZeros){
+                                    rectangle.setFill(Paint.valueOf("#f76363")); // rosso
+                                    rectangle.setStroke(Paint.valueOf("#ff0000"));
+                                    buttonContainer.setStyle("-fx-background-color: #f76363;");
+                                    rectangle.toFront();
+                                }
+
+                                buttonContainer.setSpacing(5);
+                                buttonContainer.setStyle("-fx-background-color: #6ebf5a");
+                                buttonContainer.getChildren().add(button); // Add the button to the VBox
+                            } while (rs.next());
                         }
 
                         if (hasSlots) {
@@ -626,12 +653,6 @@ public class ControllerCittadino implements Initializable {
                             scrollPane.setFitToWidth(true); // Enable horizontal scrolling if necessary
                             scrollPane.setFitToHeight(true); // Enable vertical scrolling if necessary
                             stackPane.getChildren().addAll(scrollPane); // Add the scroll pane to the stack pane
-
-                        }
-                        if(isEmpty){
-                            rectangle.setFill(Paint.valueOf("#f76363")); //rosso
-                            rectangle.setStroke(Paint.valueOf("#ff0000"));
-                            rectangle.toFront();
                         }
 
                         if (dateC.getDayOfWeek() == DayOfWeek.SATURDAY || dateC.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -641,13 +662,14 @@ public class ControllerCittadino implements Initializable {
                     if (today.getYear() == dateFocus.getYear() && today.getMonth() == dateFocus.getMonth()
                             && today.getDayOfMonth() == currentDate) {
                         rectangle.setFill(Paint.valueOf("#add8e6"));
+                        data.setStyle("-fx-background-color: #add8e6; -fx-border-color: black");
                     }
                 } else {
-                    Label data = new Label("    ");
+                    //Label data = new Label("    ");
                     data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
                     data.setPrefWidth(rectangleWidth);
                     data.setAlignment(Pos.CENTER);
-                    data.setTranslateY(-(rectangleHeight)/2 - 5);
+                    data.setTranslateY(-(rectangleHeight) / 2 - 5);
                     stackPane.getChildren().add(data);
                 }
                 calendar.getChildren().add(stackPane); // Add the stack pane to the calendar grid
@@ -743,12 +765,80 @@ public class ControllerCittadino implements Initializable {
         updateButtonStatus(backOne); // Update the initial button status
 
 
+        confermaPrenotazioneServizioSede.setOnAction(e->{
 
+        });
+
+        comboBoxSede.setMouseTransparent(true);
+        comboBoxSede.setOpacity(0.5);
+
+        ObservableList<String> serviziPrenotazioni = FXCollections.observableArrayList("Ritiro", "Rilascio primo passaporto", "Rilascio per scadenza", "Rilascio per furto", "Rilascio per smarrimento", "Rilascio per deterioramento");
+        comboBoxServizio.setItems(serviziPrenotazioni);
+
+
+        scegliServizio.setOnAction(e->{
+            ArrayList<String> cittaServizio = new ArrayList<>();
+            try {
+                cittaServizio = this.model.getSedeServizi(comboBoxServizio.getValue());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            if(cittaServizio.isEmpty()){
+                startAlertServizio();
+            } else {
+                int dim = cittaServizio.size();
+                ObservableList<String> sediDisp = FXCollections.observableArrayList();
+                for(int i = 0; i<dim; i++){
+                    sediDisp.add(cittaServizio.get(i));
+                }
+                comboBoxSede.setItems(sediDisp);
+                comboBoxSede.setMouseTransparent(false);
+                comboBoxSede.setOpacity(1);
+            }
+        });
+
+        confermaPrenotazioneServizioSede.setOnAction(e->{
+            try {
+                openCalendar(e);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            if(comboBoxServizio.getValue().equals("Ritiro")){
+                servPP = "Ritiro";
+            } else {
+                servPP = "Rilascio";
+            }
+            try {
+                numSedePP = this.model.getNSede(comboBoxSede.getValue());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            Platform.runLater(this::executeCalendarLogic);
+        });
+
+        AtomicBoolean firstRun = new AtomicBoolean(true);
+
+        Platform.runLater(()->{
+            if(firstRun.equals(false)){
+                return;
+            }
+            try{
+                drawCalendar();
+                startTimer();
+            } catch (SQLException e){
+                throw new RuntimeException(e);
+            }
+            firstRun.set(false);
+        });
+
+
+        /*
         buttonRilascio.setOnAction(e ->{
             try {
                 openCalendar(e);
                 causaPassaporto = buttonRilascio.getText();
-                isPrenotazioneClicked = true;
+                Platform.runLater(this::executeCalendarLogic);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -758,23 +848,28 @@ public class ControllerCittadino implements Initializable {
             try {
                 openCalendar(e);
                 causaPassaporto = buttonRitiro.getText();
-                isPrenotazioneClicked = true;
+                Platform.runLater(this::executeCalendarLogic);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-            Platform.runLater(() -> {
-                if (isTimerOver || indietroButtonPrenotazione.isPressed()) {
-                    return;
-                }
-                try {
-                    drawCalendar(causaPassaporto); // Call drawCalendar once on the JavaFX Application Thread
-                    startTimer();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        AtomicBoolean firstRun = new AtomicBoolean(true);
+
+        Platform.runLater(()->{
+            if(firstRun.equals(false)){
+                return;
+            }
+            try{
+                drawCalendar(causaPassaporto);
+                startTimer();
+            } catch (SQLException e){
+                throw new RuntimeException(e);
+            }
+            firstRun.set(false);
+        });
+
+         */
 
         if(indietroButtonPrenotazione.isPressed()){
             try {
@@ -786,5 +881,24 @@ public class ControllerCittadino implements Initializable {
 
     }
 
+    private void startAlertServizio() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore!");
+        alert.setHeaderText("Operazione non riuscita");
+        alert.setContentText("Non c'è nessuna sede disponibile per questo servizio.");
+        alert.showAndWait();
+    }
 
+    private void executeCalendarLogic() {
+        if (isTimerOver || indietroButtonPrenotazione.isPressed()) {
+            return;
+        }
+
+        try {
+            drawCalendar(); // Call drawCalendar once on the JavaFX Application Thread
+            startTimer();
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 }

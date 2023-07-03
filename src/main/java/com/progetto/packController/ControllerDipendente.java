@@ -1,6 +1,8 @@
 package com.progetto.packController;
 
 import com.progetto.packModel.Model;
+import com.progetto.packModel.Passaporto;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -29,14 +31,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class ControllerDipendente implements Initializable {
     private Model model = Model.getInstance();
     private static ControllerDipendente controllerDipendente;
+    Passaporto passaportoDip = new Passaporto(null, null, null, null, null);
 
     private static final String BACK_COLOR = "-fx-background-color: #c2c0c0";
     private static boolean dipendenteChecker = false;
@@ -438,7 +438,7 @@ public class ControllerDipendente implements Initializable {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            c.clear();
+            //c.clear();
         });
         buttonNuovoPP.setOnAction(e -> {
             try {
@@ -472,9 +472,11 @@ public class ControllerDipendente implements Initializable {
             c.clear();
         });
 
+
         buttonRitiraPP.setOnAction(e -> {
             try {
                 updateRitiroPassaporto(e);
+                setPassaportoRitiro(this.model.getCFCittadino());
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             } catch (SQLException ex) {
@@ -482,10 +484,12 @@ public class ControllerDipendente implements Initializable {
             }
         });
 
-        numPPR.setText(this.model.getNumero_passaporto());
+        Platform.runLater(()->{
+        numPPR.setText(this.model.getPassaportoModelNumero());
         CFPPR.setText(this.model.getCFCittadino());
-        tipoPPR.setText(this.model.getTipo_passaporto());
-        scadenzaPPR.setText(this.model.getDataScadenza());
+        tipoPPR.setText(this.model.getPassaportoModelTipo());
+        scadenzaPPR.setText(String.valueOf(this.model.getPassaportoModelDate()));
+        });
 
         terminaPPR.setMouseTransparent(true);
         terminaPPR.setOpacity(0.5);
@@ -500,6 +504,7 @@ public class ControllerDipendente implements Initializable {
             terminaPPR.setOpacity(1.0);
             startSuccessAlert("Ritiro");
         });
+
         terminaPPR.setOnAction(e -> {
             this.model.updateTerminePrenotazioni((c.get(1)));
             ((Node) (e.getSource())).getScene().getWindow().hide();
@@ -585,6 +590,20 @@ public class ControllerDipendente implements Initializable {
         ObservableList<String> contratti = FXCollections.observableArrayList("Indeterminato", "Determinato", "Part-time", "Apprendistato", "Stagista");
         choiceBoxContrattoNuovoDipendente.setItems(contratti);
     }
+
+    private void setPassaportoRitiro(String cfCittadino) {
+        this.model.getPassaportoRitiro(cfCittadino);
+    }
+
+    /*
+    private void setLabelsRitiro() {
+        numPPR.setText(passaportoDip.getNumero());
+        CFPPR.setText(passaportoDip.getCfCittadino());
+        tipoPPR.setText(passaportoDip.getTipo());
+        scadenzaPPR.setText(String.valueOf(passaportoDip.getDataScadenza()));
+
+        System.out.println("numero "+numPPR.getText());
+    }*/
 
     private void apriGestioneDipendenti(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestione-dipendenti-view.fxml"));
@@ -911,6 +930,8 @@ public class ControllerDipendente implements Initializable {
             alert.setContentText("Operazione completata con successo! Il turno di lavoro è stato inserito.");
         } else if(tipo.equals("cancellazione turno")){
             alert.setContentText("Operazione completata con successo! Il turno di lavoro è stato cancellato.");
+        } else if(tipo.equals("disattivazione passaporto")){
+            alert.setContentText("Operazione completata con successo! Il passaporto è stato disattivato.");
         }
         alert.showAndWait();
     }
@@ -964,14 +985,9 @@ public class ControllerDipendente implements Initializable {
     }
 
     // TODO
-    //      Inserimento Data
-    //      Inserimento Disponibilità Personale
-    //      Inserimento Slot (!!)
-    //      Insert Nuovo Addetto (!!)
-    //      Ritira Passaporto --> op (!!)
     //      Rilascio Passaporto --> operazioni fatte, da inserire Disattiva PP
-    //      Insert Orario Addetto
     //      DA FARE TIMESTAMP X FILA
+    /*
     private void showPassaportiCittadino() throws SQLException {
         ResultSet rs = this.model.getPassaportiCittadino();
 
@@ -1007,6 +1023,81 @@ public class ControllerDipendente implements Initializable {
             }
             scrollPanePP.setContent(vboxPP);
         }
+    }
+
+     */
+
+    private void showPassaportiCittadino() throws SQLException {
+        List<Passaporto> passports = this.model.getPassaportiCittadino();
+
+        if (passports.isEmpty()) { // vedo se è vuoto
+            vboxPP.getChildren().clear();
+            Label avviso = new Label("Non hai nessun passaporto per questa ricerca");
+            Line line = new Line(10, 10, 880, 10);
+
+            HBox entryBox = new HBox(avviso);
+
+            entryBox.setSpacing(10);
+            entryBox.setAlignment(Pos.CENTER);
+            entryBox.setSnapToPixel(true);
+            vboxPP.getChildren().addAll(entryBox, line);
+        } else {
+            int j = passports.size();
+            for(int i = 0; i<j; i++) {
+                vboxPP.getChildren().clear();
+                for (Passaporto passport : passports) {
+                    HBox entryBox = new HBox();
+                    Line line = new Line(10, 10, 890, 10);
+
+
+                    Label numero = new Label("Numero: " + passport.getNumero());
+                    Label tipo = new Label("Tipo: " + passport.getTipo());
+                    Label scadenza = new Label("Scadenza: " + passport.getDataScadenza());
+                    Label stato = new Label("Stato: " + passport.getStato());
+
+                    Button disattiva = new Button("Disattiva Passaporto");
+                    disattiva.setVisible(false);
+                    disattiva.setMouseTransparent(true);
+                    if(passport.getStato().equals("ATTIVO")){
+                        disattiva.setVisible(true);
+                        disattiva.setMouseTransparent(false);
+                    }
+
+                    entryBox.getChildren().addAll(numero, tipo, scadenza, stato, disattiva);
+
+                    entryBox.setSpacing(15);
+                    entryBox.setAlignment(Pos.CENTER);
+                    entryBox.setSnapToPixel(true);
+
+
+
+                    disattiva.setOnAction(e->{
+                        try {
+                            int key = this.model.disattivaPP(passport.getNumero());
+                            if(key==0){
+                                startDisattivaAlert();
+                            } else {
+                                startSuccessAlert("disattivazione passaporto");
+                            }
+                            showPassaportiCittadino();
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+
+                    vboxPP.getChildren().addAll(entryBox, line);
+                }
+            }
+            scrollPanePP.setContent(vboxPP);
+        }
+    }
+
+    private void startDisattivaAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore!");
+        alert.setHeaderText("Operazione non permessa!");
+        alert.setContentText("Non è stato possibile disattivare il passaporto.");
+        alert.showAndWait();
     }
 
     @FXML
@@ -1317,6 +1408,7 @@ public class ControllerDipendente implements Initializable {
             vboxpattive.getChildren().addAll(entryBox, line);
         } else {
             while (rs.next()) {
+                c.clear();
                 int id = rs.getInt("ID");
                 Label idLabel = new Label("ID Prenotazione: " + id);
 
@@ -1402,6 +1494,7 @@ public class ControllerDipendente implements Initializable {
         String cognomeA = new String();
         String nPassaporto = new String();
         String citta = new String();
+        String statoPrenotazione = new String();
 
         while (rs.next()) {
             ora = rs.getString("dataOraPrenotazione");
@@ -1412,13 +1505,18 @@ public class ControllerDipendente implements Initializable {
             cognomeA = rs.getString("addetto_cognome");
             citta = rs.getString("città");
             nPassaporto = rs.getString("numero");
+            statoPrenotazione = rs.getString("stato");
         }
-        alert.setContentText("ID prenotazione: " + id + "\nSede: " + citta + "\nData e Ora: " + ora
+        if(statoPrenotazione.equals("Annullata")){
+            nomeA = "-";
+            cognomeA = "-";
+            matricola = "-";
+        }
+        alert.setContentText("ID prenotazione: " + id +"\nStato: " +statoPrenotazione+"\nSede: " + citta + "\nPrenotazione confermata dall'utente il: " + ora
                 + "\nServizio: " + serv + "\n" +
                 "Assegnato all'addetto: " + matricola + "" + ", " + nomeA + " " + cognomeA + "\n\n" +
                 "Nome cittadino: " + nomeC + " " + cognomeC + "\nCodice fiscale associato: " + cfCittadino +
                 "\nNumero del passaporto: " + nPassaporto);
-
         alert.showAndWait();
     }
 
@@ -1440,6 +1538,7 @@ public class ControllerDipendente implements Initializable {
             labelDettCittadino.setText(this.model.getNomeCittadino() + " " + this.model.getCognomeCittadino() + " " + this.model.getCFCittadino() + ". Nato a " + this.model.getLuogoNCittadino() + ", " + this.model.getStatoNCittadino() + " il " + this.model.getDataNCittadino() + "\n\tmail: " + this.model.getMailCittadino() +
                     ", codice tessera sanitaria: " + this.model.getTessSanitariaCittadino());
         }
+        this.model.setCFCittadino(this.model.getCFCittadino());
     }
 
     //---- controller slot ----
