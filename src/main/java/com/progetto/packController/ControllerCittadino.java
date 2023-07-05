@@ -30,18 +30,21 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
+import java.sql.*;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class ControllerCittadino implements Initializable {
     private static final String BACK_COLOR = "-fx-background-color: #c2c0c0";
+    private static final int START_TIME_CODA = 10;
     private boolean isEditPWD = false;
     private boolean isEditMAIL = false;
     private boolean isPWDHidden = false;
@@ -128,6 +131,8 @@ public class ControllerCittadino implements Initializable {
 
     @FXML
     private Button scegliServizio = new Button();
+    @FXML
+    private Button buttonIndietroPrenotazioneIntermedia = new Button();
 
     private static int count = 0;
     ZonedDateTime dateFocus; // Focus date for the calendar
@@ -158,6 +163,28 @@ public class ControllerCittadino implements Initializable {
     private boolean stageSetBack = false;
     private static String servPP = new String();
     private static String numSedePP = new String();
+    @FXML
+    private Button buttonAggiornaCoda = new Button();
+    @FXML
+    private Label labelCoda = new Label();
+    boolean hasCodaStarted = false;
+    private Duration timer = Duration.minutes(5);
+    @FXML
+    private Button buttonConfermaPrenotazione = new Button();
+    private static LocalDate giornoPrenotazione;
+    private static String slotPrenotazione;
+    private static Timestamp TIME_STAMP_ENTRATA;
+    private static String SERVIZIO_ENTRATA;
+
+    private static Stage primaryStage;
+    private boolean HAS_ENTERED;
+    private boolean calendarLogicExecuted = false;
+    private boolean HAS_CODA_FINISHED = false;
+    private boolean firstRun = true;
+
+    public static void setPrimaryStage(Stage stage) {
+        primaryStage = stage;
+    }
 
     // -------- sezione apertura FXML ----------
     //TODO
@@ -167,15 +194,7 @@ public class ControllerCittadino implements Initializable {
         boolean loginChecker = this.model.checkLogin(codiceFiscale.getText(), passwordCittadino.getText(), "cittadino");
 
         if(loginChecker){
-            Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
-            Stage stage = (Stage) ((Node) eventAccediCittadino.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            String login_date = dtf.format(now);
+            openPortaleCittadino(eventAccediCittadino);
         } else {
             message.setText("USERNAME O PASSWORD NON CORRETTI.");
             codiceFiscale.setText("");
@@ -185,6 +204,15 @@ public class ControllerCittadino implements Initializable {
         }
         // prendere time stamp > per prenotazione
         // fare update db
+    }
+
+    private void openPortaleCittadino(ActionEvent eventAccediCittadino) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
+        Stage stage = (Stage) ((Node) eventAccediCittadino.getSource()).getScene().getWindow();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
     }
 
     @FXML
@@ -233,8 +261,22 @@ public class ControllerCittadino implements Initializable {
 
 
     private void openCalendar(ActionEvent e) throws IOException {
+        /*
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+        ControllerCittadino.setPrimaryStage(stage);
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+
+         */
+        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
+        Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+        if (stage == null) {
+            stage = new Stage();
+        }
+        ControllerCittadino.setPrimaryStage(stage);
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setResizable(false);
@@ -284,11 +326,11 @@ public class ControllerCittadino implements Initializable {
     }
 
     private void startAlert(String string) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Errore!");
-            alert.setHeaderText("Operazione non concessa");
-            alert.setContentText("Il campo " + string + " non è corretto.");
-            alert.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore!");
+        alert.setHeaderText("Operazione non concessa");
+        alert.setContentText("Il campo " + string + " non è corretto.");
+        alert.showAndWait();
     }
 // ------ fine ALERT ------
 
@@ -545,6 +587,64 @@ public class ControllerCittadino implements Initializable {
         return !dateFocus.isBefore(initialDate);
     }
 
+    @FXML
+    private void openCalendarApp(ActionEvent e){
+        HAS_ENTERED = true;
+
+        int numeroCoda;
+
+        LocalDateTime timestamp = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        String timeStampUtente = timestamp.format(formatter);
+        Timestamp timeStamp = Timestamp.valueOf(timeStampUtente);
+
+        if(!hasCodaStarted) {
+            if(comboBoxServizio.getValue().equals("Ritiro")){
+                servPP = "Ritiro";
+            } else {
+                servPP = "Rilascio";
+            }
+
+            TIME_STAMP_ENTRATA = timeStamp;
+            SERVIZIO_ENTRATA = servPP;
+
+            try {
+                numSedePP = this.model.getNSede(comboBoxSede.getValue());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            this.model.setCoda(servPP, numSedePP, comboBoxServizio.getValue(), timeStamp);
+        }
+
+
+        try {
+            numeroCoda = this.model.getCoda(servPP, numSedePP);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        if(numeroCoda>0){
+            startTimerCoda(numeroCoda);
+        } else {
+            try {
+                openCalendar(e);
+
+                Platform.runLater(()->{
+                    try{
+                        drawCalendar();
+                        startTimer();
+                    } catch (SQLException ex){
+                        throw new RuntimeException(ex);
+                    }
+                });
+
+                executeCalendarLogic();
+                //Platform.runLater(this::executeCalendarLogic);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
     private void drawCalendar() throws SQLException {
         year.setText(String.valueOf(dateFocus.getYear())); // Set the year text
         month.setText(dateFocus.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN).toUpperCase());
@@ -617,8 +717,10 @@ public class ControllerCittadino implements Initializable {
                                 button.setText(trasformaOrario(rs.getString(1)));
                                 button.setMaxWidth(rectangleWidth - strokeWidth); // Set max width to fit within rectangle
 
+
                                 button.setOnAction(e -> {
-                                    System.out.println(button.getText());
+                                    giornoPrenotazione = dateC;
+                                    slotPrenotazione = button.getText();
                                 });
 
                                 int slotsNumber = rs.getInt(2);
@@ -632,6 +734,8 @@ public class ControllerCittadino implements Initializable {
                                     button.setStyle("-fx-background-color: #6ebf5a; -fx-border-color: black; -fx-border-width: 1px;");
                                     button.setTextFill(Paint.valueOf("#ffffff"));
                                 }
+
+                                button.setOnMouseClicked(ex->button.setStyle("-fx-background-color: #6ebf7f; -fx-border-color: black; -fx-border-width: 1px;"));
 
                                 if(counter == hasAllZeros){
                                     rectangle.setFill(Paint.valueOf("#f76363")); // rosso
@@ -736,6 +840,48 @@ public class ControllerCittadino implements Initializable {
         return rs;
     }
 
+    private void startTimerCoda(int numeroCoda) {
+        remainingTime = START_TIME_CODA;
+        startControlloCoda(numeroCoda);
+        timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            remainingTime--;
+            if (remainingTime <= 0) {
+                try {
+                    stopTimerCoda();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+    }
+
+    private void stopTimerCoda() throws IOException {
+        if(hasCodaStarted){
+            buttonAggiornaCoda.fire();
+        } else {
+            timeline.stop();
+            HAS_CODA_FINISHED = true;
+            calendarLogicExecuted = false;
+        }
+    }
+
+    @FXML
+    private void setConfermaPrenotazione(ActionEvent e){
+        if(!slotPrenotazione.equals("")){
+            this.model.setPrenotazione(giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+            try {
+                //alert successo
+                openPortaleCittadino(e);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
+            startAlert("slot orario");
+        }
+    }
+
     // ---------- fine METODI
 
     // -- !! INITIALIZE !! --
@@ -764,15 +910,10 @@ public class ControllerCittadino implements Initializable {
         today = ZonedDateTime.now(); // Set today's date
         updateButtonStatus(backOne); // Update the initial button status
 
-
-        confermaPrenotazioneServizioSede.setOnAction(e->{
-
-        });
-
         comboBoxSede.setMouseTransparent(true);
         comboBoxSede.setOpacity(0.5);
 
-        ObservableList<String> serviziPrenotazioni = FXCollections.observableArrayList("Ritiro", "Rilascio primo passaporto", "Rilascio per scadenza", "Rilascio per furto", "Rilascio per smarrimento", "Rilascio per deterioramento");
+        ObservableList<String> serviziPrenotazioni = FXCollections.observableArrayList("Ritiro", "Rilascio per primo passaporto", "Rilascio per scadenza", "Rilascio per furto", "Rilascio per smarrimento", "Rilascio per deterioramento");
         comboBoxServizio.setItems(serviziPrenotazioni);
 
 
@@ -797,88 +938,110 @@ public class ControllerCittadino implements Initializable {
             }
         });
 
+        /*
         confermaPrenotazioneServizioSede.setOnAction(e->{
-            try {
-                openCalendar(e);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            LocalDateTime timestamp = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+            String timeStampUtente = timestamp.format(formatter);
+            Timestamp timeStamp = Timestamp.valueOf(timeStampUtente);
+
             if(comboBoxServizio.getValue().equals("Ritiro")){
                 servPP = "Ritiro";
             } else {
                 servPP = "Rilascio";
             }
+
+            TIME_STAMP_ENTRATA = timeStamp;
+            SERVIZIO_ENTRATA = servPP;
+
             try {
                 numSedePP = this.model.getNSede(comboBoxSede.getValue());
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
 
-            Platform.runLater(this::executeCalendarLogic);
+            LocalTime oraDiArrivo;
+            if(!hasCodaStarted) {
+                this.model.setCoda(servPP, numSedePP, comboBoxServizio.getValue(), timeStamp);
+                oraDiArrivo = LocalTime.now();
+            }
+
+            int numeroCoda;
+            try {
+                numeroCoda = this.model.getCoda(servPP, numSedePP);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            if(numeroCoda>0){
+                startTimerCoda(numeroCoda);
+            } else {
+                try {
+                    openCalendar(e);
+                    Platform.runLater(this::executeCalendarLogic);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                //Platform.runLater(this::executeCalendarLogic);
+            }
+
+            //Platform.runLater(this::executeCalendarLogic);
         });
 
-        AtomicBoolean firstRun = new AtomicBoolean(true);
+         */
+
+
+        buttonAggiornaCoda.setOnAction(e->{
+            openCalendarApp(e);
+        });
+
 
         Platform.runLater(()->{
-            if(firstRun.equals(false)){
-                return;
-            }
             try{
                 drawCalendar();
                 startTimer();
             } catch (SQLException e){
                 throw new RuntimeException(e);
             }
-            firstRun.set(false);
         });
-
-
-        /*
-        buttonRilascio.setOnAction(e ->{
-            try {
-                openCalendar(e);
-                causaPassaporto = buttonRilascio.getText();
-                Platform.runLater(this::executeCalendarLogic);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        buttonRitiro.setOnAction(e->{
-            try {
-                openCalendar(e);
-                causaPassaporto = buttonRitiro.getText();
-                Platform.runLater(this::executeCalendarLogic);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        AtomicBoolean firstRun = new AtomicBoolean(true);
-
-        Platform.runLater(()->{
-            if(firstRun.equals(false)){
-                return;
-            }
-            try{
-                drawCalendar(causaPassaporto);
-                startTimer();
-            } catch (SQLException e){
-                throw new RuntimeException(e);
-            }
-            firstRun.set(false);
-        });
-
-         */
 
         if(indietroButtonPrenotazione.isPressed()){
             try {
                 stopTimer();
+                //this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
+                comboBoxServizio.setValue("");
+                comboBoxSede.setValue("");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        /*
+        buttonConfermaPrenotazione.setOnAction(e->{
+            if(!slotPrenotazione.equals("")){
+                this.model.setPrenotazione(giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+                try {
+                    openPortaleCittadino(e);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else {
+                startAlert("slot orario");
+            }
+        });*/
+
+    }
+
+    private void startControlloCoda(int numeroCoda) {
+        hasCodaStarted = true;
+        confermaPrenotazioneServizioSede.setVisible(false);
+        confermaPrenotazioneServizioSede.setMouseTransparent(true);
+        comboBoxServizio.setMouseTransparent(true);
+        comboBoxServizio.setOpacity(0.5);
+        comboBoxSede.setMouseTransparent(true);
+        comboBoxSede.setOpacity(0.5);
+        labelCoda.setText("Hai "+numeroCoda+" persone in coda.");
+        buttonAggiornaCoda.setVisible(true);
     }
 
     private void startAlertServizio() {
@@ -890,13 +1053,14 @@ public class ControllerCittadino implements Initializable {
     }
 
     private void executeCalendarLogic() {
-        if (isTimerOver || indietroButtonPrenotazione.isPressed()) {
+        if (calendarLogicExecuted || isTimerOver || indietroButtonPrenotazione.isPressed()) {
             return;
         }
 
         try {
             drawCalendar(); // Call drawCalendar once on the JavaFX Application Thread
             startTimer();
+            calendarLogicExecuted = true;
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }

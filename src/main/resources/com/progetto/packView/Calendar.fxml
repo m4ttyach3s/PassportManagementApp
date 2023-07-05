@@ -80,7 +80,7 @@
          <Font name="Kohinoor Devanagari Regular" size="15.0" />
       </font>
    </Label>
-   <Button layoutX="786.0" layoutY="683.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="125.0" text="Conferma">
+   <Button fx:id="buttonConfermaPrenotazione" layoutX="786.0" layoutY="683.0" mnemonicParsing="false" onAction="#setConfermaPrenotazione" prefHeight="28.0" prefWidth="125.0" text="Conferma">
       <font>
          <Font name="Kohinoor Devanagari Regular" size="13.0" />
       </font>

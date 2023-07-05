@@ -1517,4 +1517,104 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
         return count;
     }
+
+    public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) {
+        String pattern = "Rilascio per ";
+
+        int patternIndex = value.indexOf(pattern);
+        String substring = new String();
+
+        String query = "INSERT INTO public.prenotazione(" +
+                "\"dataOraPrenotazione\", \"CFcittadino\", \"codSede\", servizio, stato, \"causaRilascio\") " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
+        if (patternIndex != -1) {
+            substring = value.substring(patternIndex + pattern.length());
+        }
+        if(servPP.equals("Ritiro")){
+            substring = null;
+        }
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setTimestamp(1, timeStamp);
+            statement.setString(2, cittadinoModel.getCodiceFiscale());
+            statement.setString(3, numSedePP);
+            statement.setString(4, servPP);
+            statement.setString(5, "in coda");
+            statement.setString(6, substring);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public int getCoda(String servPP, String numSedePP) throws SQLException {
+        int numeroCoda = 0;
+        ResultSet rs;
+
+        String query = "SELECT COUNT(*)-1\n" +
+                "FROM public.prenotazione\n" +
+                "WHERE \"codSede\"=? AND servizio=? AND stato='in coda'";
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            statement.setString(1, numSedePP);
+            statement.setString(2, servPP);
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            numeroCoda = rs.getInt(1);
+        }
+        return numeroCoda;
+    }
+
+    public void setPrenotazione(LocalDate giornoPrenotazione, String slotPrenotazione, Timestamp timeStampEntrata, String servizioEntrata) {
+        String query = "UPDATE public.prenotazione\n" +
+                "\tSET giorno=?, ora=?, servizio=?, stato='Confermata'\n" +
+                "\tWHERE \"dataOraPrenotazione\"=? AND \"CFcittadino\"=?";
+
+        Time ora = Time.valueOf(getOrarioSlot(slotPrenotazione));
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setDate(1, java.sql.Date.valueOf(giornoPrenotazione));
+            statement.setTime(2, ora);
+            statement.setString(3, servizioEntrata);
+            statement.setTimestamp(4, timeStampEntrata);
+            statement.setString(5, cittadinoModel.getCodiceFiscale());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private LocalTime getOrarioSlot(String slotPrenotazione) {
+        LocalTime ora = null;
+
+        if(slotPrenotazione.equals("09-10")){
+            ora = LocalTime.of(9, 0, 0);
+        }
+        if(slotPrenotazione.equals("10-11")){
+            ora = LocalTime.of(10, 0, 0);
+        }
+        if(slotPrenotazione.equals("11-12")){
+            ora = LocalTime.of(11, 0, 0);
+        }
+        if(slotPrenotazione.equals("14-15")){
+            ora = LocalTime.of(14, 0, 0);
+        }
+        if(slotPrenotazione.equals("15-16")){
+            ora = LocalTime.of(15, 0, 0);
+        }
+        if(slotPrenotazione.equals("16-17")){
+            ora = LocalTime.of(16, 0, 0);
+        }
+
+        return ora;
+    }
 }

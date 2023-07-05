@@ -13,6 +13,11 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="329.0" prefWidth="599.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progetto.packController.ControllerCittadino">
    <children>
+      <Button fx:id="buttonAggiornaCoda" layoutX="418.0" layoutY="243.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="155.0" text="Aggiorna" visible="false">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="13.0" />
+         </font>
+      </Button>
       <Arc layoutX="4.0" layoutY="153.0" length="270.0" radiusX="328.0" radiusY="328.0" startAngle="41.6" stroke="#ffffff00" strokeLineCap="ROUND" strokeLineJoin="BEVEL" strokeMiterLimit="50.0" strokeType="INSIDE" type="ROUND">
          <fill>
             <LinearGradient endX="1.0" endY="1.0" startY="0.15676959619952494">
@@ -41,17 +46,17 @@
             </LinearGradient>
          </fill>
       </Arc>
-      <Label layoutX="49.0" layoutY="181.0" prefHeight="19.0" prefWidth="191.0" text="Seleziona la sede per il servizio:">
+      <Label layoutX="52.0" layoutY="150.0" prefHeight="19.0" prefWidth="191.0" text="Seleziona la sede per il servizio:">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="13.0" />
          </font>
       </Label>
-      <Label layoutX="55.0" layoutY="131.0" prefHeight="17.0" prefWidth="178.0" text="Seleziona il servizio richiesto:">
+      <Label layoutX="58.0" layoutY="100.0" prefHeight="17.0" prefWidth="178.0" text="Seleziona il servizio richiesto:">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="13.0" />
          </font>
       </Label>
-      <Button fx:id="confermaPrenotazioneServizioSede" layoutX="418.0" layoutY="243.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="155.0" text="Conferma">
+      <Button fx:id="confermaPrenotazioneServizioSede" layoutX="418.0" layoutY="243.0" mnemonicParsing="false" onAction="#openCalendarApp" prefHeight="26.0" prefWidth="155.0" text="Conferma">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="13.0" />
          </font></Button>
@@ -61,11 +66,17 @@
             <Font name="Azonix" size="14.0" />
          </font>
       </Label>
-      <ChoiceBox fx:id="comboBoxServizio" layoutX="249.0" layoutY="128.0" prefHeight="26.0" prefWidth="222.0" />
-      <ChoiceBox fx:id="comboBoxSede" layoutX="249.0" layoutY="178.0" prefHeight="26.0" prefWidth="222.0" />
-      <Button fx:id="scegliServizio" layoutX="486.0" layoutY="128.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="87.0" text="Scegli">
+      <ChoiceBox fx:id="comboBoxServizio" layoutX="252.0" layoutY="97.0" prefHeight="26.0" prefWidth="222.0" />
+      <ChoiceBox fx:id="comboBoxSede" layoutX="252.0" layoutY="147.0" prefHeight="26.0" prefWidth="222.0" />
+      <Button fx:id="scegliServizio" layoutX="489.0" layoutY="97.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="87.0" text="Scegli">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="13.0" />
          </font></Button>
+      <Label fx:id="labelCoda" alignment="CENTER" layoutY="198.0" prefHeight="17.0" prefWidth="599.0" />
+      <Button fx:id="buttonIndietroPrenotazioneIntermedia" layoutX="52.0" layoutY="243.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="155.0" text="Indietro">
+         <font>
+            <Font name="Kohinoor Devanagari Regular" size="12.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>
