@@ -11,7 +11,7 @@ module com.progetto.ver1_0 {
     requires java.sql;
     requires itextpdf;
     requires barcodes;
-    requires kernel;
+    //requires kernel;
 
     opens com.progetto.packController to javafx.fxml;
     exports com.progetto.packController;

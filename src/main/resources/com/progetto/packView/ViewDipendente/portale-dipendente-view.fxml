@@ -78,14 +78,14 @@
             </Label>
          </children>
       </AnchorPane>
-      <SplitMenuButton fx:id="filtroPrenotazioni" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="1.0" layoutX="587.0" layoutY="144.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="373.0" text="Mostra">
+      <SplitMenuButton fx:id="filtroPrenotazioni" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="1.0" layoutX="587.0" layoutY="144.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="373.0" text="Filtra le prenotazioni per:">
         <items>
           <MenuItem mnemonicParsing="false" text="Action 1" />
           <MenuItem mnemonicParsing="false" text="Action 2" />
         </items>
       </SplitMenuButton>
-      <TextField fx:id="cercaPrenotazioneField" layoutX="157.0" layoutY="145.0" prefHeight="26.0" prefWidth="304.0" promptText="inserisci numero ID, es.: 1" />
-      <Label layoutX="26.0" layoutY="147.0" text="Cerca prenotazione:">
+      <TextField fx:id="cercaPrenotazioneField" layoutX="177.0" layoutY="145.0" prefHeight="26.0" prefWidth="284.0" promptText="inserisci numero ID, es.: 1" />
+      <Label layoutX="29.0" layoutY="147.0" text="Cerca ID prenotazione:">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="14.0" />
          </font>
@@ -100,8 +100,8 @@
             <Font name="Kohinoor Devanagari Regular" size="14.0" />
          </font>
       </Button>
-      <Line fx:id="lineaSx" endX="29.836639404296875" endY="7.62939453125E-6" layoutX="223.0" layoutY="118.0" startX="-190.92849731445312" startY="7.62939453125E-6" />
-      <Line fx:id="lineaDx" endX="64.03741455078125" layoutX="866.0" layoutY="118.0" startX="-146.94583129882812" />
+      <Line fx:id="lineaSx" endX="29.836639404296875" endY="7.62939453125E-6" layoutX="223.0" layoutY="118.0" startX="-195.37294006347656" startY="7.62939453125E-6" />
+      <Line fx:id="lineaDx" endX="88.0" layoutX="866.0" layoutY="118.0" startX="-146.94583129882812" />
       <Button fx:id="buttonCerca" layoutX="468.0" layoutY="144.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="68.0" text="Cerca" />
       <Button fx:id="buttonAggiornaDB" layoutX="781.0" layoutY="183.0" mnemonicParsing="false" onAction="#aggiornaDB" prefHeight="26.0" prefWidth="182.0" style="-fx-background-color: #277C5E;" text="Aggiorna" textFill="WHITE" />
       <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#c4d5cf" height="29.0" layoutX="-53.0" layoutY="181.0" stroke="TRANSPARENT" strokeType="INSIDE" width="823.0" />

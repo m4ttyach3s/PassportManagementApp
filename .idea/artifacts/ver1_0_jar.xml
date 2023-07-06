@@ -33,6 +33,9 @@
       <element id="extracted-dir" path="$USER_HOME$/Downloads/postgresql-42.6.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-web/17.0.2/javafx-web-17.0.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/17.0.2/javafx-base-17.0.2-mac-aarch64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/itextpdf-5.5.9.jar" path-in-jar="/" />
+      <element id="library" level="project" name="itextpdf-5.5.9" />
+      <element id="library" level="project" name="barcodes-7.2.5" />
     </root>
   </artifact>
 </component>

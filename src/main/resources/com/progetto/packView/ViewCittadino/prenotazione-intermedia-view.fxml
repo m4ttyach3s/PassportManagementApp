@@ -68,12 +68,12 @@
       </Label>
       <ChoiceBox fx:id="comboBoxServizio" layoutX="252.0" layoutY="97.0" prefHeight="26.0" prefWidth="222.0" />
       <ChoiceBox fx:id="comboBoxSede" layoutX="252.0" layoutY="147.0" prefHeight="26.0" prefWidth="222.0" />
-      <Button fx:id="scegliServizio" layoutX="489.0" layoutY="97.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="87.0" text="Scegli">
+      <Button fx:id="scegliServizio" layoutX="489.0" layoutY="97.0" mnemonicParsing="false" onAction="#getCheckCittaServizio" prefHeight="26.0" prefWidth="87.0" text="Scegli">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="13.0" />
          </font></Button>
       <Label fx:id="labelCoda" alignment="CENTER" layoutY="198.0" prefHeight="17.0" prefWidth="599.0" />
-      <Button fx:id="buttonIndietroPrenotazioneIntermedia" layoutX="52.0" layoutY="243.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="155.0" text="Indietro">
+      <Button fx:id="buttonIndietroPrenotazioneIntermedia" layoutX="52.0" layoutY="243.0" mnemonicParsing="false" onAction="#tornaPortaleCittadino" prefHeight="27.0" prefWidth="155.0" text="Indietro">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="12.0" />
          </font>

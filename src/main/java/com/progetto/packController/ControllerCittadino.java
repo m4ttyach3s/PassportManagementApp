@@ -33,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.sql.Date;
 import java.time.*;
+import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -149,7 +150,7 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button backOne = new Button();
 
-    private static final int START_TIME = 5*60; // 5 minutes in seconds
+    private static final int START_TIME = 20;//5*60; // 5 minutes in seconds
     private int remainingTime;
     @FXML
     private Label labelTempoRimasto = new Label();
@@ -172,7 +173,7 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button buttonConfermaPrenotazione = new Button();
     private static LocalDate giornoPrenotazione;
-    private static String slotPrenotazione;
+    private static String slotPrenotazione = new String();
     private static Timestamp TIME_STAMP_ENTRATA;
     private static String SERVIZIO_ENTRATA;
 
@@ -180,7 +181,9 @@ public class ControllerCittadino implements Initializable {
     private boolean HAS_ENTERED;
     private boolean calendarLogicExecuted = false;
     private boolean HAS_CODA_FINISHED = false;
-    private boolean firstRun = true;
+    private boolean isRed;
+    @FXML
+    private Button indietrohidden = new Button();
 
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
@@ -207,6 +210,16 @@ public class ControllerCittadino implements Initializable {
     }
 
     private void openPortaleCittadino(ActionEvent eventAccediCittadino) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
+        Stage stage = (Stage) ((Node) eventAccediCittadino.getSource()).getScene().getWindow();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    @FXML
+    private void tornaPortaleCittadino(ActionEvent eventAccediCittadino) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
         Stage stage = (Stage) ((Node) eventAccediCittadino.getSource()).getScene().getWindow();
         Scene scene = new Scene(root);
@@ -329,7 +342,19 @@ public class ControllerCittadino implements Initializable {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
         alert.setHeaderText("Operazione non concessa");
-        alert.setContentText("Il campo " + string + " non è corretto.");
+        if(string.equals("slot orario")){
+            alert.setContentText("Il campo " + string + " non è disponibile.");
+        } else if(string.equals("primo passaporto")){
+            alert.setContentText("Attenzione, non è il suo primo passaporto! Scelga un servizio corretto.");
+        } else if(string.equals("in scadenza")){
+            alert.setContentText("Attenzione, il suo passaporto non è in scadenza! Scelga un servizio corretto.");
+        } else if(string.equals("attenzione")){
+            alert.setContentText("Attenzione, questo servizio non è conforme con i suoi dati.");
+        }else if(string.equals("ritiro")){
+            alert.setContentText("Attenzione, non è ancora passato un mese dalla sua richiesta.\nIl ritiro può essere richiesto una volta trascorso il periodo di tempo precedentemente citato.");
+        }else {
+            alert.setContentText("Il campo " + string + " non è corretto.");
+        }
         alert.showAndWait();
     }
 // ------ fine ALERT ------
@@ -645,6 +670,10 @@ public class ControllerCittadino implements Initializable {
             }
         }
     }
+
+    // TODO
+    //      Se la data e l'ora sono minori dell'ora e data attuale --> button in rosso
+    //      Se il button è rosso --> do not retrieve text.
     private void drawCalendar() throws SQLException {
         year.setText(String.valueOf(dateFocus.getYear())); // Set the year text
         month.setText(dateFocus.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN).toUpperCase());
@@ -680,10 +709,10 @@ public class ControllerCittadino implements Initializable {
 
                 int calculatedDate = (j + 1) + (7 * i); // Calculate the date for the current cell
                 Label data = new Label();
+                ArrayList<String> giorniRossi = new ArrayList<>();
                 if (calculatedDate > dateOffset) { // Check if the date is valid for the current month
                     int currentDate = calculatedDate - dateOffset; // Calculate the current date of the month
                     if (currentDate <= monthMaxDate) { // Check if the current date is within the valid range
-
                         data.setText(String.valueOf(currentDate));
                         data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
                         data.setPrefWidth(rectangleWidth);
@@ -713,39 +742,69 @@ public class ControllerCittadino implements Initializable {
                         int counter = 0;
                         if (hasSlots) {
                             do {
-                                Button button = new Button(trasformaOrario(rs.getString(1)));
+                                //giorniRossi.clear();
+
+                                LocalTime slotHour = LocalTime.parse(rs.getString(1));
+                                Button button = new Button(trasformaOrario(String.valueOf(slotHour)));
+                                Label labelRed = new Label(trasformaOrario(rs.getString(1)));
+
                                 button.setText(trasformaOrario(rs.getString(1)));
                                 button.setMaxWidth(rectangleWidth - strokeWidth); // Set max width to fit within rectangle
 
 
-                                button.setOnAction(e -> {
-                                    giornoPrenotazione = dateC;
-                                    slotPrenotazione = button.getText();
-                                });
-
                                 int slotsNumber = rs.getInt(2);
+
+                                if(dateC.isBefore(LocalDate.now())){
+                                    rectangle.setFill(Paint.valueOf("#808080"));
+                                    rectangle.toBack();
+                                }
+
+                                //if (slotsNumber <= 0 || (slotsNumber<=0 && slotHour.isBefore(LocalTime.now()))) {
 
                                 if (slotsNumber <= 0) {
                                     counter++;
                                     button.setStyle("-fx-background-color: #f76363; -fx-border-color: black; -fx-border-width: 1px;");
                                     button.setMouseTransparent(true);
                                     button.toFront();
+                                    giorniRossi.add(button.getText());
+                                }
+                                if(dateC.isBefore(LocalDate.now())){
+                                    button.setStyle("-fx-background-color: #808080; -fx-border-color: black; -fx-border-width: 1px;");
+                                    button.setMouseTransparent(true);
+                                    rectangle.setFill(Paint.valueOf("#808080"));
+                                    button.setTextFill(Paint.valueOf("#ffffff"));
+                                    button.toFront();
                                 } else {
                                     button.setStyle("-fx-background-color: #6ebf5a; -fx-border-color: black; -fx-border-width: 1px;");
                                     button.setTextFill(Paint.valueOf("#ffffff"));
                                 }
 
-                                button.setOnMouseClicked(ex->button.setStyle("-fx-background-color: #6ebf7f; -fx-border-color: black; -fx-border-width: 1px;"));
+                                if(dateC.equals(LocalDate.now()) && slotHour.isBefore(LocalTime.now())){
+                                    button.setStyle("-fx-background-color: #808080; -fx-border-color: black; -fx-border-width: 1px;");
+                                    button.setMouseTransparent(true);
+                                    rectangle.setFill(Paint.valueOf("#808080"));
+                                    button.toFront();
+                                }
+
+                                button.setOnMouseClicked(ex->button.setStyle("-fx-background-color: #6ebf9f; -fx-border-color: black; -fx-border-width: 1px;"));
 
                                 if(counter == hasAllZeros){
                                     rectangle.setFill(Paint.valueOf("#f76363")); // rosso
                                     rectangle.setStroke(Paint.valueOf("#ff0000"));
                                     buttonContainer.setStyle("-fx-background-color: #f76363;");
+                                    labelRed.setStyle("-fx-background-color: #f76363;");
                                     rectangle.toFront();
                                 }
 
+                                button.setOnAction(e -> {
+                                        giornoPrenotazione = dateC;
+                                        System.out.println(giornoPrenotazione);
+                                        slotPrenotazione = button.getText();
+                                });
+
                                 buttonContainer.setSpacing(5);
-                                buttonContainer.setStyle("-fx-background-color: #6ebf5a");
+                                buttonContainer.setStyle("-fx-background-color: transparent");
+                                //buttonContainer.setOpacity(0);
                                 buttonContainer.getChildren().add(button); // Add the button to the VBox
                             } while (rs.next());
                         }
@@ -759,7 +818,7 @@ public class ControllerCittadino implements Initializable {
                             stackPane.getChildren().addAll(scrollPane); // Add the scroll pane to the stack pane
                         }
 
-                        if (dateC.getDayOfWeek() == DayOfWeek.SATURDAY || dateC.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                        if (dateC.getDayOfWeek() == DayOfWeek.SATURDAY || dateC.getDayOfWeek() == DayOfWeek.SUNDAY || dateC.isBefore(LocalDate.now())) {
                             rectangle.setFill(Paint.valueOf("#808080"));
                         }
                     }
@@ -795,6 +854,8 @@ public class ControllerCittadino implements Initializable {
                             stopTimer();
                         } catch (IOException e) {
                             throw new RuntimeException(e);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 })
@@ -809,11 +870,22 @@ public class ControllerCittadino implements Initializable {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    private void stopTimer() throws IOException {
+    private void stopTimer() throws IOException, SQLException {
         timeline.stop();
         isTimerOver = true;
-        indietroButtonPrenotazione.fire();
         stageSetBack = true;
+        indietrohidden.setOnAction(e->{
+            try {
+                this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                openPortaleCittadino(e);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     private String trasformaOrario(String string) {
@@ -869,10 +941,10 @@ public class ControllerCittadino implements Initializable {
 
     @FXML
     private void setConfermaPrenotazione(ActionEvent e){
-        if(!slotPrenotazione.equals("")){
-            this.model.setPrenotazione(giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+        if((slotPrenotazione != null || !slotPrenotazione.equals("")) && giornoPrenotazione!=null){
+            this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
             try {
-                //alert successo
+                startAzioneSuccess("slot");
                 openPortaleCittadino(e);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -880,6 +952,18 @@ public class ControllerCittadino implements Initializable {
         } else {
             startAlert("slot orario");
         }
+    }
+
+    private void startAzioneSuccess(String value) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Confermato!");
+        alert.setHeaderText("Operazione completata");
+
+
+        if(value.equals("slot")){
+            alert.setContentText("Operazione completata con successo! La sua prenotazione per il giorno "+giornoPrenotazione +" tra le ore "+slotPrenotazione +" è stata inserita.");
+        }
+        alert.showAndWait();
     }
 
     // ---------- fine METODI
@@ -916,85 +1000,12 @@ public class ControllerCittadino implements Initializable {
         ObservableList<String> serviziPrenotazioni = FXCollections.observableArrayList("Ritiro", "Rilascio per primo passaporto", "Rilascio per scadenza", "Rilascio per furto", "Rilascio per smarrimento", "Rilascio per deterioramento");
         comboBoxServizio.setItems(serviziPrenotazioni);
 
-
-        scegliServizio.setOnAction(e->{
-            ArrayList<String> cittaServizio = new ArrayList<>();
-            try {
-                cittaServizio = this.model.getSedeServizi(comboBoxServizio.getValue());
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            if(cittaServizio.isEmpty()){
-                startAlertServizio();
-            } else {
-                int dim = cittaServizio.size();
-                ObservableList<String> sediDisp = FXCollections.observableArrayList();
-                for(int i = 0; i<dim; i++){
-                    sediDisp.add(cittaServizio.get(i));
-                }
-                comboBoxSede.setItems(sediDisp);
-                comboBoxSede.setMouseTransparent(false);
-                comboBoxSede.setOpacity(1);
-            }
-        });
-
-        /*
-        confermaPrenotazioneServizioSede.setOnAction(e->{
-            LocalDateTime timestamp = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-            String timeStampUtente = timestamp.format(formatter);
-            Timestamp timeStamp = Timestamp.valueOf(timeStampUtente);
-
-            if(comboBoxServizio.getValue().equals("Ritiro")){
-                servPP = "Ritiro";
-            } else {
-                servPP = "Rilascio";
-            }
-
-            TIME_STAMP_ENTRATA = timeStamp;
-            SERVIZIO_ENTRATA = servPP;
-
-            try {
-                numSedePP = this.model.getNSede(comboBoxSede.getValue());
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-
-            LocalTime oraDiArrivo;
-            if(!hasCodaStarted) {
-                this.model.setCoda(servPP, numSedePP, comboBoxServizio.getValue(), timeStamp);
-                oraDiArrivo = LocalTime.now();
-            }
-
-            int numeroCoda;
-            try {
-                numeroCoda = this.model.getCoda(servPP, numSedePP);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-
-            if(numeroCoda>0){
-                startTimerCoda(numeroCoda);
-            } else {
-                try {
-                    openCalendar(e);
-                    Platform.runLater(this::executeCalendarLogic);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                //Platform.runLater(this::executeCalendarLogic);
-            }
-
-            //Platform.runLater(this::executeCalendarLogic);
-        });
-
-         */
-
-
         buttonAggiornaCoda.setOnAction(e->{
             openCalendarApp(e);
         });
 
+        confermaPrenotazioneServizioSede.setOpacity(0.5);
+        confermaPrenotazioneServizioSede.setMouseTransparent(true);
 
         Platform.runLater(()->{
             try{
@@ -1004,32 +1015,6 @@ public class ControllerCittadino implements Initializable {
                 throw new RuntimeException(e);
             }
         });
-
-        if(indietroButtonPrenotazione.isPressed()){
-            try {
-                stopTimer();
-                //this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
-                comboBoxServizio.setValue("");
-                comboBoxSede.setValue("");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        /*
-        buttonConfermaPrenotazione.setOnAction(e->{
-            if(!slotPrenotazione.equals("")){
-                this.model.setPrenotazione(giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
-                try {
-                    openPortaleCittadino(e);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            } else {
-                startAlert("slot orario");
-            }
-        });*/
-
     }
 
     private void startControlloCoda(int numeroCoda) {
@@ -1064,5 +1049,70 @@ public class ControllerCittadino implements Initializable {
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    @FXML
+    private void getCheckCittaServizio(ActionEvent e) throws SQLException {
+        ArrayList<String> cittaServizio = new ArrayList<>();
+        boolean isPrimoPassaporto = false;
+        boolean isPassaportoInScadenza = false;
+        boolean isPassaportoFRS = false;
+        boolean isRitiroDisponibile = false;
+
+        String causaRilascio = this.model.getCausaRilascio(comboBoxServizio.getValue());
+        LocalDate dataRitiro = null;
+
+        if (causaRilascio == null) {
+            dataRitiro = this.model.getIfPassaportoRitiro();
+            isRitiroDisponibile = (dataRitiro != null);
+            if (!isRitiroDisponibile) {
+                startAlert("ritiro");
+            }
+        } else if (causaRilascio.equals("primo passaporto")) {
+            isPrimoPassaporto = this.model.getPresenzaPassaporto();
+            if (!isPrimoPassaporto) {
+                startAlert("primo passaporto");
+            }
+        } else if (causaRilascio.equals("scadenza")) {
+            isPassaportoInScadenza = this.model.getScadenzaPassaporto();
+            if (!isPassaportoInScadenza) {
+                startAlert("in scadenza");
+            }
+        } else if (causaRilascio.equals("furto") || causaRilascio.equals("deterioramento") || causaRilascio.equals("smarrimento")) {
+            isPassaportoFRS = this.model.getPassaportoFRS();
+            if (!isPassaportoFRS) {
+                startAlert("attenzione");
+            }
+        }
+
+        if (isPrimoPassaporto || isPassaportoInScadenza || isPassaportoFRS || isRitiroDisponibile) {
+            confermaPrenotazioneServizioSede.setOpacity(1);
+            confermaPrenotazioneServizioSede.setMouseTransparent(false);
+            try {
+                cittaServizio = this.model.getSedeServizi(comboBoxServizio.getValue());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            if(cittaServizio.isEmpty()){
+                startAlertServizio();
+            } else {
+                int dim = cittaServizio.size();
+                ObservableList<String> sediDisp = FXCollections.observableArrayList();
+                for(int i = 0; i<dim; i++){
+                    sediDisp.add(cittaServizio.get(i));
+                }
+                comboBoxSede.setItems(sediDisp);
+                comboBoxSede.setMouseTransparent(false);
+                comboBoxSede.setOpacity(1);
+            }
+        }
+
+    }
+    @FXML
+    private void indietroPrenotazioneUtente(ActionEvent e) throws IOException, SQLException {
+        stopTimer();
+        this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
+        openPortaleCittadino(e);
     }
 }

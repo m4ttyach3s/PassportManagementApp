@@ -301,7 +301,6 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //connectDB.closeConnection(this.connection);
         return rs;
     }
 
@@ -1317,8 +1316,8 @@ String tipoPassaporto = result.getTipoPassaporto();
     public ResultSet getSlots(LocalDate dateFocus, String codice, String text) throws SQLException {
         String query = "SELECT ora, \"numeroPosti\" FROM public.appuntamento\n" +
                 "WHERE giorno = ?\n" +
-                "AND \"codSede\" = ? " + // Added a space here
-                "AND servizio = ? " + // Added a space here
+                "AND \"codSede\" = ? " +
+                "AND servizio = ? " +
                 "ORDER BY ora ASC";
         ResultSet rs = null;
         this.connection = connectDB.getConnection();
@@ -1409,39 +1408,6 @@ String tipoPassaporto = result.getTipoPassaporto();
         return affectedRows;
     }
 
-    /*
-    public ArrayList<String> getSedeServizi(String value) {
-        String servizio = new String();
-        if(value.equals("Ritiro")){
-            servizio = "Ritiro";
-        } else {
-            servizio = "Rilascio";
-        }
-
-        ArrayList<String> sedi = new ArrayList<>();
-
-        try {
-            String query = "SELECT DISTINCT città\n" +
-                    "FROM public.appuntamento\n" +
-                    "JOIN public.sede ON \"codSede\" = codice\n" +
-                    "WHERE servizio = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, servizio);
-            ResultSet rs = statement.executeQuery();
-
-            while (rs.next()) {
-                sedi.add(rs.getString(1));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
-        return sedi;
-    }
-
-     */
-
     public ArrayList<String> getSedeServizi(String value) throws SQLException {
         String servizio = value.equals("Ritiro") ? "Ritiro" : "Rilascio";
         ArrayList<String> sedi = new ArrayList<>();
@@ -1460,7 +1426,7 @@ String tipoPassaporto = result.getTipoPassaporto();
                     sedi.add(rs.getString(1));
                 }
 
-                statement.close(); // Close the statement after use
+                statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1518,22 +1484,27 @@ String tipoPassaporto = result.getTipoPassaporto();
         return count;
     }
 
-    public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) {
+    public String getCausaRilascio(String string){
         String pattern = "Rilascio per ";
 
-        int patternIndex = value.indexOf(pattern);
+        int patternIndex = string.indexOf(pattern);
         String substring = new String();
 
+        if (patternIndex != -1) {
+            substring = string.substring(patternIndex + pattern.length());
+        }
+        if(string.equals("Ritiro")){
+            substring = null;
+        }
+        return substring;
+    }
+
+    public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) {
         String query = "INSERT INTO public.prenotazione(" +
                 "\"dataOraPrenotazione\", \"CFcittadino\", \"codSede\", servizio, stato, \"causaRilascio\") " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
-        if (patternIndex != -1) {
-            substring = value.substring(patternIndex + pattern.length());
-        }
-        if(servPP.equals("Ritiro")){
-            substring = null;
-        }
+        String substring = getCausaRilascio(value);
 
         try{
             PreparedStatement statement = connection.prepareStatement(query);
@@ -1573,20 +1544,30 @@ String tipoPassaporto = result.getTipoPassaporto();
         return numeroCoda;
     }
 
-    public void setPrenotazione(LocalDate giornoPrenotazione, String slotPrenotazione, Timestamp timeStampEntrata, String servizioEntrata) {
-        String query = "UPDATE public.prenotazione\n" +
-                "\tSET giorno=?, ora=?, servizio=?, stato='Confermata'\n" +
-                "\tWHERE \"dataOraPrenotazione\"=? AND \"CFcittadino\"=?";
+    public void setPrenotazione(String numSedePP, LocalDate giornoPrenotazione, String slotPrenotazione, Timestamp timeStampEntrata, String servizioEntrata) {
 
-        Time ora = Time.valueOf(getOrarioSlot(slotPrenotazione));
+        String query = "BEGIN;\n" +
+                "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n" +
+                "UPDATE public.prenotazione\n" +
+                "SET giorno=?, ora=?, servizio=?, stato='Confermata'\n" +
+                "WHERE \"dataOraPrenotazione\"=? AND \"CFcittadino\"=?;\n" +
+                "UPDATE public.appuntamento\n" +
+                "SET \"numeroPosti\" = \"numeroPosti\" - 1\n" +
+                "WHERE \"codSede\" = ? AND giorno = ? AND ora = ?;\n" +
+                "COMMIT;";
+
+        LocalTime ora = getOrarioSlot(slotPrenotazione);
 
         try{
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setDate(1, java.sql.Date.valueOf(giornoPrenotazione));
-            statement.setTime(2, ora);
+            statement.setObject(2, java.sql.Time.valueOf(ora));
             statement.setString(3, servizioEntrata);
             statement.setTimestamp(4, timeStampEntrata);
             statement.setString(5, cittadinoModel.getCodiceFiscale());
+            statement.setString(6, numSedePP);
+            statement.setDate(7, java.sql.Date.valueOf(giornoPrenotazione));
+            statement.setObject(8, java.sql.Time.valueOf(ora));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -1596,7 +1577,7 @@ String tipoPassaporto = result.getTipoPassaporto();
     private LocalTime getOrarioSlot(String slotPrenotazione) {
         LocalTime ora = null;
 
-        if(slotPrenotazione.equals("09-10")){
+        if(slotPrenotazione.equals("9-10")){
             ora = LocalTime.of(9, 0, 0);
         }
         if(slotPrenotazione.equals("10-11")){
@@ -1616,5 +1597,133 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
 
         return ora;
+    }
+
+    public boolean getPresenzaPassaporto() throws SQLException {
+
+        String query = "SELECT COUNT(*)\n" +
+                "FROM public.passaporto \n" +
+                "WHERE \"CFcittadino\" = ?";
+
+        ResultSet rs = null;
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            if(rs.getInt(1)==0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean getScadenzaPassaporto() throws SQLException {
+        /*String query = "SELECT giorno - CURRENT_DATE\n" +
+                "FROM public.passaporto PA\n" +
+                "JOIN public.prenotazione PR ON \"IDrilascio\" = \"ID\"\n" +
+                "WHERE PA.\"CFcittadino\" = ?\n" +
+                "AND PA.stato = 'IN PROCESSO'";*/
+        String query = "SELECT \"dataScadenza\" - CURRENT_DATE\n" +
+                "FROM public.passaporto \n" +
+                "WHERE \"CFcittadino\" = ?\n" +
+                "AND stato = 'ATTIVO'";
+
+        ResultSet rs = null;
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            if(rs.getInt(1)<0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean getPassaportoFRS() throws SQLException {
+
+        String query = "SELECT COUNT(*)\n" +
+                "FROM public.passaporto\n" +
+                "WHERE \"CFcittadino\" = ?\n" +
+                "AND stato = 'ATTIVO'\n" +
+                "AND \"dataScadenza\" - CURRENT_DATE > 0";
+
+        ResultSet rs = null;
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            if(rs.getInt(1)==1){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // NON deve restituire data, da rifare
+    public LocalDate getIfPassaportoRitiro() throws SQLException {
+        LocalDate dataRitiro = null;
+
+        String query = "SELECT giorno - CURRENT_DATE\n" +
+                "FROM public.passaporto PA\n" +
+                "JOIN public.prenotazione PR ON \"IDrilascio\" = \"ID\"\n" +
+                "WHERE PA.\"CFcittadino\" = ?\n" +
+                "AND PA.stato = 'IN PROCESSO'";
+
+        ResultSet rs = null;
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            dataRitiro = rs.getDate(1).toLocalDate();
+        }
+        return dataRitiro;
+    }
+
+    public void deletePrenotazione(Timestamp timeStampEntrata) throws SQLException {
+        String query = "DELETE FROM public.prenotazione\n" +
+                "\tWHERE \"dataOraPrenotazione\" = ?\n" +
+                "\tAND \"CFcittadino\" = ?";
+
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setTimestamp(1, timeStampEntrata);
+            statement.setString(2, cittadinoModel.getCodiceFiscale());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        connection.close();
     }
 }
