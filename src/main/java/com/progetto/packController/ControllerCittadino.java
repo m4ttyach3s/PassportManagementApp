@@ -150,7 +150,7 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button backOne = new Button();
 
-    private static final int START_TIME = 20;//5*60; // 5 minutes in seconds
+    private static final int START_TIME = 5*60; // 5 minutes in seconds
     private int remainingTime;
     @FXML
     private Label labelTempoRimasto = new Label();
@@ -184,6 +184,7 @@ public class ControllerCittadino implements Initializable {
     private boolean isRed;
     @FXML
     private Button indietrohidden = new Button();
+    private static String CAUSA_RILASCIO = new String();
 
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
@@ -351,8 +352,12 @@ public class ControllerCittadino implements Initializable {
         } else if(string.equals("attenzione")){
             alert.setContentText("Attenzione, questo servizio non è conforme con i suoi dati.");
         }else if(string.equals("ritiro")){
-            alert.setContentText("Attenzione, non è ancora passato un mese dalla sua richiesta.\nIl ritiro può essere richiesto una volta trascorso il periodo di tempo precedentemente citato.");
-        }else {
+            alert.setContentText("Attenzione, questa azione non è permessa.\nNon possiede nessun passaporto da ritirare.");
+        }else if(string.equals("ritiro mancante")){
+            alert.setContentText("Attenzione, la data dell'appuntamento di ritiro da Lei scelta non è permessa.\nLa data deve essere scelta ad un mese dalla sua domanda di rilascio.");
+        } else if(string.equals("data scadenza")){
+            alert.setContentText("Attenzione, la data dell'appuntamento da Lei scelta non è permessa.\nLa data deve essere scelta sei mesi prima dalla data di scadenza del suo passaporto.");
+        } else {
             alert.setContentText("Il campo " + string + " non è corretto.");
         }
         alert.showAndWait();
@@ -888,6 +893,7 @@ public class ControllerCittadino implements Initializable {
         });
     }
 
+    // to model
     private String trasformaOrario(String string) {
         String rs = new String();
 
@@ -939,9 +945,21 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /*
     @FXML
-    private void setConfermaPrenotazione(ActionEvent e){
+    private void setConfermaPrenotazione(ActionEvent e) throws SQLException {
         if((slotPrenotazione != null || !slotPrenotazione.equals("")) && giornoPrenotazione!=null){
+
+            if(RITIRO_TRENTA_GIORNI){
+                boolean checker = this.model.checkRitiro(giornoPrenotazione);
+                if(checker){
+                    this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+                } else {
+                    startAlert("ritiro mancante");
+                }
+            }
+
+            // controllo 6 mesi.
             this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
             try {
                 startAzioneSuccess("slot");
@@ -952,6 +970,42 @@ public class ControllerCittadino implements Initializable {
         } else {
             startAlert("slot orario");
         }
+    }
+*/
+    @FXML
+    private void setConfermaPrenotazione(ActionEvent event) throws SQLException, IOException {
+            boolean hasRitiro = this.model.checkRitiro(giornoPrenotazione);
+            boolean hasScadenza = this.model.checkScadenzaPP();
+            System.out.println("giorno prenotazione " + giornoPrenotazione);
+            System.out.println("RITIRO: " + (CAUSA_RILASCIO.equals("")) + " " + isValidInput() + " " + hasRitiro);
+            System.out.println("SCADENZA: " + CAUSA_RILASCIO + " " + isValidInput() + " " + hasScadenza);
+            System.out.println("Causa rilascio: " + CAUSA_RILASCIO);
+
+            if (isValidInput()) {
+                if (CAUSA_RILASCIO.equals("") && hasRitiro) {
+                    this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+                    startAzioneSuccess("slot");
+                    openPortaleCittadino(event);
+                } else if (CAUSA_RILASCIO.equals("scadenza") && hasScadenza) {
+                    this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+                    startAzioneSuccess("slot");
+                    openPortaleCittadino(event);
+                } else if (CAUSA_RILASCIO.equals("scadenza")) {
+                    startAlert("data scadenza");
+                } else if(CAUSA_RILASCIO.equals("")){
+                    startAlert("ritiro mancante");
+                } else {
+                    this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
+                    startAzioneSuccess("slot");
+                    openPortaleCittadino(event);
+                }
+            } else {
+                startAlert("slot orario");
+            }
+    }
+
+    private boolean isValidInput() {
+        return slotPrenotazione != null && !slotPrenotazione.isEmpty() && giornoPrenotazione != null;
     }
 
     private void startAzioneSuccess(String value) {
@@ -1058,30 +1112,43 @@ public class ControllerCittadino implements Initializable {
         boolean isPassaportoInScadenza = false;
         boolean isPassaportoFRS = false;
         boolean isRitiroDisponibile = false;
+        boolean isPrenotazionePresente = false;
 
-        String causaRilascio = this.model.getCausaRilascio(comboBoxServizio.getValue());
+
+        CAUSA_RILASCIO = this.model.getCausaRilascio(comboBoxServizio.getValue());
         LocalDate dataRitiro = null;
 
-        if (causaRilascio == null) {
+        if (CAUSA_RILASCIO == null) {
+            CAUSA_RILASCIO = "";
             dataRitiro = this.model.getIfPassaportoRitiro();
             isRitiroDisponibile = (dataRitiro != null);
             if (!isRitiroDisponibile) {
                 startAlert("ritiro");
+                comboBoxSede.setMouseTransparent(true);
+                comboBoxSede.setOpacity(0.5);
             }
-        } else if (causaRilascio.equals("primo passaporto")) {
+        } else if (CAUSA_RILASCIO.equals("primo passaporto")) {
+            CAUSA_RILASCIO = "primo passaporto";
             isPrimoPassaporto = this.model.getPresenzaPassaporto();
             if (!isPrimoPassaporto) {
                 startAlert("primo passaporto");
+                comboBoxSede.setMouseTransparent(true);
+                comboBoxSede.setOpacity(0.5);
             }
-        } else if (causaRilascio.equals("scadenza")) {
-            isPassaportoInScadenza = this.model.getScadenzaPassaporto();
+        } else if (CAUSA_RILASCIO.equals("scadenza")) {
+            CAUSA_RILASCIO = "scadenza";
+            isPassaportoInScadenza = this.model.checkScadenzaPP();
             if (!isPassaportoInScadenza) {
                 startAlert("in scadenza");
+                comboBoxSede.setMouseTransparent(true);
+                comboBoxSede.setOpacity(0.5);
             }
-        } else if (causaRilascio.equals("furto") || causaRilascio.equals("deterioramento") || causaRilascio.equals("smarrimento")) {
+        } else if (CAUSA_RILASCIO.equals("furto") || CAUSA_RILASCIO.equals("deterioramento") || CAUSA_RILASCIO.equals("smarrimento")) {
             isPassaportoFRS = this.model.getPassaportoFRS();
             if (!isPassaportoFRS) {
                 startAlert("attenzione");
+                comboBoxSede.setMouseTransparent(true);
+                comboBoxSede.setOpacity(0.5);
             }
         }
 

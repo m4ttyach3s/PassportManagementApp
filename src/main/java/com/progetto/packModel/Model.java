@@ -5,6 +5,7 @@ import com.progetto.PDFGenerator;
 import com.progetto.RandomPasswordGenerator;
 import com.progetto.packController.ConnectDB;
 
+import javax.xml.transform.Result;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.sql.*;
@@ -1525,6 +1526,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         int numeroCoda = 0;
         ResultSet rs;
 
+        this.connection = connectDB.getConnection();
+
         String query = "SELECT COUNT(*)-1\n" +
                 "FROM public.prenotazione\n" +
                 "WHERE \"codSede\"=? AND servizio=? AND stato='in coda'";
@@ -1624,12 +1627,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
+    /*
     public boolean getScadenzaPassaporto() throws SQLException {
-        /*String query = "SELECT giorno - CURRENT_DATE\n" +
-                "FROM public.passaporto PA\n" +
-                "JOIN public.prenotazione PR ON \"IDrilascio\" = \"ID\"\n" +
-                "WHERE PA.\"CFcittadino\" = ?\n" +
-                "AND PA.stato = 'IN PROCESSO'";*/
         String query = "SELECT \"dataScadenza\" - CURRENT_DATE\n" +
                 "FROM public.passaporto \n" +
                 "WHERE \"CFcittadino\" = ?\n" +
@@ -1653,6 +1652,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
         return false;
     }
+
+     */
 
     public boolean getPassaportoFRS() throws SQLException {
 
@@ -1685,7 +1686,7 @@ String tipoPassaporto = result.getTipoPassaporto();
     public LocalDate getIfPassaportoRitiro() throws SQLException {
         LocalDate dataRitiro = null;
 
-        String query = "SELECT giorno - CURRENT_DATE\n" +
+        String query = "SELECT giorno\n" +
                 "FROM public.passaporto PA\n" +
                 "JOIN public.prenotazione PR ON \"IDrilascio\" = \"ID\"\n" +
                 "WHERE PA.\"CFcittadino\" = ?\n" +
@@ -1725,5 +1726,62 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
 
         connection.close();
+    }
+
+    public boolean checkRitiro(LocalDate giornoPrenotazione) throws SQLException {
+
+        ResultSet rs = null;
+
+        String query = "SELECT ? - giorno\n" +
+                "FROM public.passaporto PA\n" +
+                "JOIN public.prenotazione PR ON \"IDrilascio\" = \"ID\"\n" +
+                "WHERE PA.\"CFcittadino\" = ?\n" +
+                "AND PA.stato = 'IN PROCESSO'";
+
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setDate(1, java.sql.Date.valueOf(giornoPrenotazione));
+            statement.setString(2, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            if(rs.getInt(1)>30){
+                return true;
+            }
+        }
+        connection.close();
+        return false;
+    }
+
+    public boolean checkScadenzaPP() throws SQLException {
+        ResultSet rs = null;
+
+        String query = "SELECT (\"dataScadenza\" - CURRENT_DATE) < 180\n" +
+                "FROM public.passaporto\n" +
+                "WHERE \"CFcittadino\" = ?\n" +
+                "AND stato = 'ATTIVO'";
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            statement.setString(1, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            if(rs.getBoolean(1)==true){
+                return true;
+            }
+        }
+        connection.close();
+        return false;
     }
 }
