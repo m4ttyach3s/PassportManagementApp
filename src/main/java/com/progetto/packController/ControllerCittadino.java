@@ -150,7 +150,7 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button backOne = new Button();
 
-    private static final int START_TIME = 5*60; // 5 minutes in seconds
+    private static final int START_TIME = 8*60; // 5 minutes in seconds
     private int remainingTime;
     @FXML
     private Label labelTempoRimasto = new Label();
@@ -265,12 +265,19 @@ public class ControllerCittadino implements Initializable {
     //  creare la classe Calendario con i pulsanti per gli orari
     @FXML
     void openPortalePrenotazioni(ActionEvent nP) throws IOException, SQLException {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/prenotazione-intermedia-view.fxml"));
-        Stage stage = (Stage) ((Node) nP.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
+
+        boolean isPrenotazionePresente = this.model.getPrenotazioneUnica();
+
+        if(!isPrenotazionePresente) {
+            Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/prenotazione-intermedia-view.fxml"));
+            Stage stage = (Stage) ((Node) nP.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.show();
+        } else {
+            startAlert("prenotazione presente");
+        }
     }
 
 
@@ -357,7 +364,9 @@ public class ControllerCittadino implements Initializable {
             alert.setContentText("Attenzione, la data dell'appuntamento di ritiro da Lei scelta non è permessa.\nLa data deve essere scelta ad un mese dalla sua domanda di rilascio.");
         } else if(string.equals("data scadenza")){
             alert.setContentText("Attenzione, la data dell'appuntamento da Lei scelta non è permessa.\nLa data deve essere scelta sei mesi prima dalla data di scadenza del suo passaporto.");
-        } else {
+        } else if(string.equals("prenotazione presente")){
+            alert.setContentText("Attenzione, è già presente una prenotazione oppure sta tentando di effettuare una prenotazione con un dispositivo diverso.\nPuoi visualizzarla nella scheda Prenotazioni Attive.\nPer proseguire deve attendere l'esecuzione dell'appuntamento precedente oppure annullare la prenotazione presente.");
+        }else {
             alert.setContentText("Il campo " + string + " non è corretto.");
         }
         alert.showAndWait();
@@ -648,7 +657,7 @@ public class ControllerCittadino implements Initializable {
 
 
         try {
-            numeroCoda = this.model.getCoda(servPP, numSedePP);
+            numeroCoda = this.model.getCoda(servPP, numSedePP, TIME_STAMP_ENTRATA);
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
@@ -879,6 +888,10 @@ public class ControllerCittadino implements Initializable {
         timeline.stop();
         isTimerOver = true;
         stageSetBack = true;
+
+        indietroButtonPrenotazione.fire();
+
+        /*
         indietrohidden.setOnAction(e->{
             try {
                 this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
@@ -890,7 +903,7 @@ public class ControllerCittadino implements Initializable {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-        });
+        });*/
     }
 
     // to model
@@ -1112,8 +1125,6 @@ public class ControllerCittadino implements Initializable {
         boolean isPassaportoInScadenza = false;
         boolean isPassaportoFRS = false;
         boolean isRitiroDisponibile = false;
-        boolean isPrenotazionePresente = false;
-
 
         CAUSA_RILASCIO = this.model.getCausaRilascio(comboBoxServizio.getValue());
         LocalDate dataRitiro = null;
@@ -1176,9 +1187,10 @@ public class ControllerCittadino implements Initializable {
         }
 
     }
+
+
     @FXML
     private void indietroPrenotazioneUtente(ActionEvent e) throws IOException, SQLException {
-        stopTimer();
         this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
         openPortaleCittadino(e);
     }

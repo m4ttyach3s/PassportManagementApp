@@ -98,8 +98,10 @@ public class PDFGenerator {
                 6. Ricevuta del pagamento da 42.50€ presso il conto corrente della questura:
                                                        IBAN: IT07 Z 03069 02126 100000046021
                                
-                Ricordati di presentarti puntuale e di presentare allo sportello il suo numero di prenotazione
+                Si ricordi di presentarsi puntuale e di presentare allo sportello il suo numero di prenotazione
                 e/o questo PDF in formato cartaceo oppure elettronico.
+                SI RICORDA INOLTRE: in caso di cittadino minorenne l'utente deve essere accompagnato allo sportello da un genitore,
+                tutore o di chi ne fa le veci.
                 """;
         return output;
     }
@@ -120,8 +122,10 @@ public class PDFGenerator {
                 6. Ricevuta del pagamento da 42.50€ presso il conto corrente della questura:
                                                        IBAN: IT07 Z 03069 02126 100000046021
                                
-                Ricordati di presentarti puntuale e di presentare allo sportello il suo numero di prenotazione
+                Si ricordi di presentarsi puntuale e di presentare allo sportello il suo numero di prenotazione
                 e/o questo PDF in formato cartaceo oppure elettronico.
+                SI RICORDA INOLTRE: in caso di cittadino minorenne l'utente deve essere accompagnato allo sportello da un genitore,
+                tutore o di chi ne fa le veci.
                 """;
         return output;
     }
@@ -142,8 +146,10 @@ public class PDFGenerator {
                 6. Ricevuta del pagamento da 42.50€ presso il conto corrente della questura:
                                                        IBAN: IT07 Z 03069 02126 100000046021
                                
-                Ricordati di presentarti puntuale e di presentare allo sportello il suo numero di prenotazione
+                Si ricordi di presentarsi puntuale e di presentare allo sportello il suo numero di prenotazione
                 e/o questo PDF in formato cartaceo oppure elettronico.
+                SI RICORDA INOLTRE: in caso di cittadino minorenne l'utente deve essere accompagnato allo sportello da un genitore,
+                tutore o di chi ne fa le veci.
                 """;
         return output;
     }
@@ -159,7 +165,10 @@ public class PDFGenerator {
                 2. Un documento in corso di validità che attesti la sua identità (carta di identità, patente, passaporto estero)
                 3. Una delega con allegato la copia della carta di identità del delegato e del delegante
 
-                Ricordati di presentarti puntuale e di presentare allo sportello il suo numero di prenotazione e/o questo PDF in formato cartaceo oppure elettronico.
+                Si ricordi di presentarsi puntuale e di presentare allo sportello il suo numero di prenotazione
+                e/o questo PDF in formato cartaceo oppure elettronico.
+                SI RICORDA INOLTRE: in caso di cittadino minorenne l'utente deve essere accompagnato allo sportello da un genitore,
+                tutore o di chi ne fa le veci.
                 """;
         return output;
     }

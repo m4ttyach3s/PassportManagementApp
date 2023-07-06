@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Text?>
 
 <AnchorPane fx:id="anchoraPaneCalendario" prefHeight="750.0" prefWidth="950.0" style="-fx-background-color: #f2fafc;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progetto.packController.ControllerCittadino">
-   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#76a997" height="28.0" layoutX="708.0" layoutY="7.0" stroke="TRANSPARENT" strokeType="INSIDE" width="218.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#660007" height="28.0" layoutX="708.0" layoutY="7.0" stroke="TRANSPARENT" strokeType="INSIDE" width="218.0" />
    <Line fx:id="line2" endX="242.0" layoutX="456.0" layoutY="19.0" startX="-148.5" />
    <Label alignment="CENTER" layoutX="10.0" layoutY="11.0" prefHeight="18.0" prefWidth="304.0" text="Portale Gestione Passaporti">
       <font>
@@ -85,12 +85,12 @@
          <Font name="Kohinoor Devanagari Regular" size="13.0" />
       </font>
    </Button>
-   <Label layoutX="714.0" layoutY="12.0" text="Tempo rimasto:" textFill="WHITE">
+   <Label layoutX="716.0" layoutY="12.0" text="Tempo rimasto:" textFill="WHITE">
       <font>
          <Font name="Kohinoor Devanagari Regular" size="13.0" />
       </font>
    </Label>
-   <Label fx:id="labelTempoRimasto" layoutX="811.0" layoutY="13.0" prefHeight="17.0" prefWidth="106.0" textFill="WHITE">
+   <Label fx:id="labelTempoRimasto" layoutX="814.0" layoutY="13.0" prefHeight="17.0" prefWidth="106.0" textFill="WHITE">
       <font>
          <Font name="Kohinoor Devanagari Regular" size="12.0" />
       </font>

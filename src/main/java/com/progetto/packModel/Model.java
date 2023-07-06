@@ -5,7 +5,6 @@ import com.progetto.PDFGenerator;
 import com.progetto.RandomPasswordGenerator;
 import com.progetto.packController.ConnectDB;
 
-import javax.xml.transform.Result;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.sql.*;
@@ -1522,20 +1521,21 @@ String tipoPassaporto = result.getTipoPassaporto();
 
     }
 
-    public int getCoda(String servPP, String numSedePP) throws SQLException {
+    public int getCoda(String servPP, String numSedePP, Timestamp timeStampEntrata) throws SQLException {
         int numeroCoda = 0;
         ResultSet rs;
 
         this.connection = connectDB.getConnection();
 
-        String query = "SELECT COUNT(*)-1\n" +
+        String query = "SELECT COUNT(*)\n" +
                 "FROM public.prenotazione\n" +
-                "WHERE \"codSede\"=? AND servizio=? AND stato='in coda'";
+                "WHERE \"codSede\"=? AND servizio=? AND stato='in coda' AND \"dataOraPrenotazione\" < ?";
         try{
             PreparedStatement statement = connection.prepareStatement(query);
 
             statement.setString(1, numSedePP);
             statement.setString(2, servPP);
+            statement.setTimestamp(3, timeStampEntrata);
             rs = statement.executeQuery();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -1547,8 +1547,9 @@ String tipoPassaporto = result.getTipoPassaporto();
         return numeroCoda;
     }
 
-    public void setPrenotazione(String numSedePP, LocalDate giornoPrenotazione, String slotPrenotazione, Timestamp timeStampEntrata, String servizioEntrata) {
+    public void setPrenotazione(String numSedePP, LocalDate giornoPrenotazione, String slotPrenotazione, Timestamp timeStampEntrata, String servizioEntrata) throws SQLException {
 
+        this.connection = connectDB.getConnection();
         String query = "BEGIN;\n" +
                 "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n" +
                 "UPDATE public.prenotazione\n" +
@@ -1782,6 +1783,31 @@ String tipoPassaporto = result.getTipoPassaporto();
             }
         }
         connection.close();
+        return false;
+    }
+
+    public boolean getPrenotazioneUnica() throws SQLException {
+        ResultSet rs = null;
+
+        String query = "SELECT COUNT(*)=1\n" +
+                "FROM public.prenotazione\n" +
+                "WHERE \"CFcittadino\" = ? AND (stato='Confermata' OR stato='in coda')";
+
+        this.connection = connectDB.getConnection();
+
+        try{
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, cittadinoModel.getCodiceFiscale());
+            rs = statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(rs.next()){
+            if(rs.getBoolean(1) == true){
+                return true;
+            }
+        }
         return false;
     }
 }
