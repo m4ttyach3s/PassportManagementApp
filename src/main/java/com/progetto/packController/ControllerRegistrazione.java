@@ -25,7 +25,7 @@ import java.util.ResourceBundle;
 public class ControllerRegistrazione implements Initializable {
     boolean isShowPwd = false;
     private static Collection<String> c = new ArrayList<>();
-    final Model model = Model.getInstance();
+    private final Model model = Model.getInstance();
 
     @FXML
     TextField cfUtente;

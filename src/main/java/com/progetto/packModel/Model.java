@@ -105,7 +105,7 @@ public class Model {
     }
 
     // costruttore
-    public Model() {
+    /*public Model() {
         this.Nome = new String();
         this.Cognome = new String();
         this.Sede = new String();
@@ -131,6 +131,13 @@ public class Model {
         this.tipo_passaporto = new String();
         statusAnagrafica = false;
         tabellaCittadino = false;
+
+
+    }*/
+
+
+    private Model(){
+        this.connectDB = new ConnectDB();
     }
 
     public static Model getInstance() {
@@ -254,6 +261,7 @@ public class Model {
             addettoModel.setResponsabile(dipendenteCheck(addettoModel.getMatricola()));
             addettoModel.setCodiceSede(getAddettoCodiceSede(id));
         }
+
 
         connectDB.closeConnection(this.connection);
         return result;

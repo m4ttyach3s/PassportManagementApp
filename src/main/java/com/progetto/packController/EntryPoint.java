@@ -13,7 +13,8 @@ import java.io.IOException;
 public class EntryPoint extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        Model model = new Model();
+        //Model model = new Model();
+        Model model = Model.getInstance();
         ControllerFirstView controller;
         FXMLLoader loader = new FXMLLoader(EntryPoint.class.getResource("/com/progetto/packView/first-view.fxml"));
         Parent root = loader.load();

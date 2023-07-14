@@ -1000,9 +1000,6 @@ public class ControllerDipendente implements Initializable {
         showResults(rs);
     }
 
-    // TODO
-    //      Rilascio Passaporto --> operazioni fatte, da inserire Disattiva PP
-    //      DA FARE TIMESTAMP X FILA
     /*
     private void showPassaportiCittadino() throws SQLException {
         ResultSet rs = this.model.getPassaportiCittadino();
@@ -1416,11 +1413,12 @@ public class ControllerDipendente implements Initializable {
     }
 
     // lo uso per far vedere cos'ho nei filtri --> portale dipendente view, è l'accordion
+    /*
     private void showResults(ResultSet rs) throws SQLException {
         VBox vboxpattive = new VBox();
         vboxpattive.setSpacing(10);
         vboxpattive.setPadding(new Insets(10));
-        if (!rs.isBeforeFirst()) { // vedo se è vuoto
+        if (!rs.isBeforeFirst() || !rs.next()) { // vedo se è vuoto
             Label avviso = new Label("Non hai nessuna prenotazione per questa ricerca");
             Line line = new Line(10, 10, 930, 10);
 
@@ -1502,6 +1500,101 @@ public class ControllerDipendente implements Initializable {
                 entryBox.setAlignment(Pos.CENTER);
                 entryBox.setSnapToPixel(true);
                 vboxpattive.getChildren().addAll(entryBox, line);
+
+                dettagliP.setOnAction(e -> {
+                    try {
+                        popUpDettagli(serv, id, cfCittadino);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    dettagliP.setStyle("-fx-background-color: #76A997");
+                });
+            }
+            ScrollPaneAttive.setContent(vboxpattive);
+        }
+        ScrollPaneAttive.setContent(vboxpattive);
+    }
+     */
+
+    private void showResults(ResultSet rs) throws SQLException {
+        VBox vboxpattive = new VBox();
+        vboxpattive.setSpacing(10);
+        vboxpattive.setPadding(new Insets(10));
+        ResultSetIterator iterator = new ResultSetIteratorImpl(rs);
+
+        if (!iterator.hasNext()) {
+            Label avviso = new Label("Non hai nessuna prenotazione per questa ricerca");
+            Line line = new Line(10, 10, 930, 10);
+
+            HBox entryBox = new HBox(avviso);
+            entryBox.setSpacing(10);
+            entryBox.setAlignment(Pos.CENTER);
+            entryBox.setSnapToPixel(true);
+            vboxpattive.getChildren().addAll(entryBox, line);
+        } else {
+            while (iterator.hasNext()) {
+                Object[] rowData = iterator.next();
+                int id = (int) rowData[0];
+                String cfCittadino = (String) rowData[1];
+                String ora = (String) rowData[2];
+                String serv = (String) rowData[3];
+                String causa = (String) rowData[4];
+                String data = (String) rowData[5];
+                String csede = (String) rowData[6];
+
+                Label idLabel = new Label("ID Prenotazione: " + id);
+                Label CFcittadino = new Label("Codice Fiscale: " + cfCittadino);
+                Label Ora = new Label("Ora della prenotazione: " + ora);
+                Label Serv = new Label("Servizio richiesto: " + serv);
+                Label sede = new Label("presso " + csede);
+
+                HBox entryBox = new HBox();
+                Line line = new Line(10, 10, 930, 10);
+
+                Button gestisciButton = new Button("Prendi in carico");
+                Button dettagliP = new Button("Dettagli prenotazione");
+
+                if (causa.equals("Confermata")) {
+                    entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, gestisciButton);
+                } else {
+                    entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, dettagliP);
+                }
+
+                entryBox.setSpacing(15);
+                entryBox.setAlignment(Pos.CENTER);
+                entryBox.setSnapToPixel(true);
+                vboxpattive.getChildren().addAll(entryBox, line);
+
+                gestisciButton.setOnAction((e) -> {
+                    String codice_sede;
+                    try {
+                        codice_sede = this.model.getNSede(csede);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    System.out.println(codice_sede + " " + this.model.getSedeAddetto());
+                    if (codice_sede.equals(this.model.getSedeAddetto())) {
+                        try {
+                            this.model.updateSchedaPrenotazione(String.valueOf(id));
+                            this.model.getInfoCittadino(cfCittadino);
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Parent root = null;
+                        try {
+                            root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestisci-prenotazione-view.fxml"));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Stage secondaryStage = new Stage();
+                        Scene scene2 = new Scene(root);
+                        secondaryStage.setScene(scene2);
+                        secondaryStage.setResizable(false);
+                        secondaryStage.show();
+                    } else {
+                        startAlertPrendiCarico();
+                    }
+                });
 
                 dettagliP.setOnAction(e -> {
                     try {

@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 public class ControllerRegistrazioneTest {
     private ControllerRegistrazione controller;
-    private Model mockModel;
+    private Model mockModel = Model.getInstance();
 
     @BeforeClass
     public static void setUpClass() {
