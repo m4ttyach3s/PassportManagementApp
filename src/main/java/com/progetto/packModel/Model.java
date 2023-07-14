@@ -602,8 +602,9 @@ public class Model {
 
     public void getInfoCittadino(String cfCittadino) throws SQLException {
         ResultSet rs = null;
+        this.connection = connectDB.getConnection();
         try {
-            String query = "SELECT \"CF\", cognome, nome, \"luogoN\", \"dataN\", email, tutore1, tutore2, categoria, \"tessSanitaria\", \"statoN\" " +
+            String query = "SELECT \"CF\", cognome, nome, \"luogoN\", \"dataN\", email, categoria, \"tessSanitaria\", \"statoN\" " +
                     "FROM public.cittadino WHERE \"CF\" = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, cfCittadino);
@@ -621,11 +622,12 @@ public class Model {
             dataNCittadino = rs.getString("dataN");
             mailCittadino = rs.getString("email");
             tessSanitariaCittadino = rs.getString("tessSanitaria");
-            tutore1Cittadino = rs.getString("tutore1");
-            tutore2Cittadino = rs.getString("tutore2");
+            //tutore1Cittadino = rs.getString("tutore1");
+            //tutore2Cittadino = rs.getString("tutore2");
             categoriaCittadino = rs.getString("categoria");
         }
 
+        connection.close();
     }
 
     public void updateSchedaPrenotazione(String idPrenotazione) {
@@ -887,7 +889,7 @@ String tipoPassaporto = result.getTipoPassaporto();
 
     public ResultSet dipendentiData(String dataUpper) throws SQLException {
         ResultSet rs = null;
-
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT DISTINCT AD.matricola, AD.nome, AD.cognome " +
                     "FROM public.addetto AS AD " +
@@ -900,6 +902,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        connection.close();
         return rs;
     }
 
@@ -934,7 +938,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
-    public void insertDataMancante(LocalDate dataSlot, String dataUpper) {
+    public void insertDataMancante(LocalDate dataSlot, String dataUpper) throws SQLException {
+        this.connection = connectDB.getConnection();
         try {
             String query = "INSERT INTO public.data(ggmmaaaa, giorno) VALUES (?, ?)";
             PreparedStatement statement = connection.prepareStatement(query);
@@ -944,11 +949,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
 
     public boolean checkPresenzaData(LocalDate dataSlot) throws SQLException {
         ResultSet rs = null;
         boolean checker = false;
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT COUNT(*) ggmmaaaa FROM public.data WHERE ggmmaaaa=?";
             PreparedStatement statement = connection.prepareStatement(query);
@@ -963,10 +970,14 @@ String tipoPassaporto = result.getTipoPassaporto();
             e.printStackTrace();
         }
 
+        connection.close();
+
         return checker;
     }
 
-    public void insertDisponibilita(String mat, LocalDate dataSlot, boolean sceltaDipSlot) {
+    public void insertDisponibilita(String mat, LocalDate dataSlot, boolean sceltaDipSlot) throws SQLException {
+
+        this.connection = connectDB.getConnection();
         try {
             String query = "INSERT INTO public.\"disponibilità\"(\"matricolaAddetto\", ggmmaaaa, presenza) VALUES (?, ?, ?);";
             PreparedStatement statement = connection.prepareStatement(query);
@@ -977,10 +988,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        connection.close();
     }
 
-    public boolean checkAddettoDisponibilita(String matricola, LocalDate dataSlot) {
+    public boolean checkAddettoDisponibilita(String matricola, LocalDate dataSlot) throws SQLException {
         ResultSet rs;
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT \"matricolaAddetto\" FROM public.\"disponibilità\"" +
                     "WHERE \"matricolaAddetto\"=? AND ggmmaaaa=?";
@@ -996,10 +1010,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return false;
     }
 
     public ResultSet getAnteprimaSlot(LocalDate dataSlot) throws SQLException {
+        this.connection = connectDB.getConnection();
         ResultSet rs = null;
 
         if(dataSlot == null){
@@ -1038,10 +1054,12 @@ String tipoPassaporto = result.getTipoPassaporto();
                 e.printStackTrace();
             }
         }
+        connection.close();
         return rs;
     }
 
-    public void inserisciAppuntamento(String codiceSede, String data, String hslot, String serv, int numslot) {
+    public void inserisciAppuntamento(String codiceSede, String data, String hslot, String serv, int numslot) throws SQLException {
+        this.connection = connectDB.getConnection();
         String query = "INSERT INTO public.appuntamento(\"codSede\", giorno, ora, servizio, \"numeroPosti\") VALUES (?, ?, ?, ?, ?);";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -1054,9 +1072,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
 
     public boolean checkPresenzaSlot(String codiceSede, String data, String hslot) throws SQLException {
+        this.connection = connectDB.getConnection();
         String query = "SELECT \"codSede\", giorno, ora FROM public.appuntamento WHERE \"codSede\"=? AND giorno=? AND ora=?";
         ResultSet rs = null;
         try{
@@ -1072,10 +1092,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         if(!rs.next()){
             return false;
         }
+        connection.close();
         return true;
     }
 
-    public ResultSet getDettagliPrenotazione(String serv, int id) {
+    public ResultSet getDettagliPrenotazione(String serv, int id) throws SQLException {
         String rr;
         ResultSet rs = null;
 
@@ -1084,6 +1105,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } else {
             rr = "\"IDritiro\"";
         }
+        this.connection = connectDB.getConnection();
 
         String query = "SELECT \"dataOraPrenotazione\", CT.nome AS cittadino_nome, CT.cognome AS cittadino_cognome, \"CF\", città, \"matricolaAddetto \", AD.nome AS addetto_nome, AD.cognome AS addetto_cognome, numero, P.stato\n" +
                 "FROM public.prenotazione P\n" +
@@ -1098,10 +1120,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch(SQLException e){
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
-    public ResultSet getDipendentiSede() {
+    public ResultSet getDipendentiSede() throws SQLException {
+        this.connection = connectDB.getConnection();
         ResultSet rs = null;
         String query = "SELECT matricola, nome, cognome, contratto, \"sedeLavoro\", \"telUfficio\", email " +
                 "FROM public.addetto WHERE \"sedeLavoro\"=?";
@@ -1112,6 +1136,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch(SQLException e){
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -1136,6 +1161,8 @@ String tipoPassaporto = result.getTipoPassaporto();
     }
 
     private boolean checkPresenzaMatricola(String matricolaGenerata) throws SQLException {
+
+        this.connection = connectDB.getConnection();
         String query = "SELECT matricola FROM public.addetto WHERE matricola=?";
         ResultSet rs = null;
         try{
@@ -1148,6 +1175,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         if(!rs.next()){
             return false;
         }
+        connection.close();
         return true;
     }
 
@@ -1161,6 +1189,8 @@ String tipoPassaporto = result.getTipoPassaporto();
     }
 
     private boolean MailChecker(String fieldMailNuovoDipendente) throws SQLException {
+        this.connection = connectDB.getConnection();
+
         String query = "SELECT email FROM public.addetto WHERE email=?";
         ResultSet rs = null;
         try{
@@ -1173,6 +1203,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         if(!rs.next()){
             return false;
         }
+        connection.close();
         return true;
     }
 
@@ -1193,6 +1224,7 @@ String tipoPassaporto = result.getTipoPassaporto();
     }
 
     private boolean checkPresenzaNumero(String input) throws SQLException {
+        this.connection = connectDB.getConnection();
         String query = "SELECT \"telUfficio\" FROM public.addetto WHERE \"telUfficio\"=?";
         ResultSet rs = null;
         try{
@@ -1205,6 +1237,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         if(!rs.next()){
             return false;
         }
+        connection.close();
         return true;
     }
 
@@ -1214,7 +1247,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         return passwordEncrypted;
     }
 
-    public void insertNuovoDipendente(String matricola, String nome, String cognome, String contratto, String telefono, String mail, String pwdGenerata) {
+    public void insertNuovoDipendente(String matricola, String nome, String cognome, String contratto, String telefono, String mail, String pwdGenerata) throws SQLException {
+        this.connection = connectDB.getConnection();
 
         String query = "INSERT INTO public.addetto(matricola, nome, cognome, contratto, \"sedeLavoro\", \"telUfficio\", email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try{
@@ -1231,6 +1265,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch(SQLException e){
             e.printStackTrace();
         }
+        connection.close();
     }
 
     public boolean checkPresenzaTurno(String matricola, String orario, String giorno) throws SQLException {
@@ -1264,6 +1299,7 @@ String tipoPassaporto = result.getTipoPassaporto();
 
     private boolean checkTurno(String matricola, LocalTime orarioInizio, LocalTime orarioFine, String giorno) throws SQLException {
         ResultSet rs = null;
+        this.connection = connectDB.getConnection();
         String query = "SELECT * FROM public.\"turnoLavoro\" WHERE \"matricolaAddetto\" = ? AND giorno = ? AND \"orarioInizio\" = ? AND \"orarioFine\" = ?";
         try{
             PreparedStatement statement = connection.prepareStatement(query);
@@ -1279,12 +1315,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         if(!rs.next()){
             return false;
         }
+        connection.close();
         return true;
     }
 
     public void insertTurnoDipendente(String matricola, String orario, String giorno) throws SQLException {
         String query = "INSERT INTO public.\"turnoLavoro\"(\"matricolaAddetto\", giorno, \"orarioInizio\", \"orarioFine\") VALUES (?, ?, ?, ?)";
         ArrayList<LocalTime> orari = getOrari(orario);
+        this.connection = connectDB.getConnection();
 
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -1296,10 +1334,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
 
-    public void deleteTurnoDipendente(String matricola, String orario, String giorno) {
+    public void deleteTurnoDipendente(String matricola, String orario, String giorno) throws SQLException {
         ArrayList<LocalTime> orari = getOrari(orario);
+        this.connection = connectDB.getConnection();
+
         String query = "DELETE FROM public.\"turnoLavoro\" WHERE \"matricolaAddetto\"=? AND giorno=? AND \"orarioInizio\"=? AND \"orarioFine\"=?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -1311,6 +1352,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
 
     public ResultSet getSlots(LocalDate dateFocus, String codice, String text) throws SQLException {
@@ -1360,7 +1402,9 @@ String tipoPassaporto = result.getTipoPassaporto();
         cittadinoModel.setCodiceFiscale(cfCittadino);
     }
 
-    public void getPassaportoRitiro(String cfCittadino) {
+    public void getPassaportoRitiro(String cfCittadino) throws SQLException {
+        this.connection = connectDB.getConnection();
+
         try {
             String query = "SELECT numero, tipo, \"dataScadenza\", stato, \"IDrilascio\", \"IDritiro\" FROM public.passaporto " +
                     "WHERE \"CFcittadino\" = ? AND stato='IN PROCESSO'";
@@ -1382,6 +1426,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
     public String getPassaportoModelNumero(){
         return passaportoModel.getNumero();
@@ -1399,12 +1444,14 @@ String tipoPassaporto = result.getTipoPassaporto();
     }
 
     public int disattivaPP(String text) throws SQLException {
+        this.connection = connectDB.getConnection();
         String query = "UPDATE public.passaporto\n" +
                 "\tSET stato='NON ATTIVO'\n" +
                 "\tWHERE numero = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, text);
         int affectedRows = statement.executeUpdate();
+        connection.close();
         return affectedRows;
     }
 
@@ -1481,6 +1528,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         while(rs.next()){
             count = rs.getInt(1);
         }
+        connection.close();
         return count;
     }
 
@@ -1499,7 +1547,8 @@ String tipoPassaporto = result.getTipoPassaporto();
         return substring;
     }
 
-    public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) {
+    public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) throws SQLException {
+        this.connection = connectDB.getConnection();
         String query = "INSERT INTO public.prenotazione(" +
                 "\"dataOraPrenotazione\", \"CFcittadino\", \"codSede\", servizio, stato, \"causaRilascio\") " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
@@ -1518,7 +1567,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
+        connection.close();
     }
 
     public int getCoda(String servPP, String numSedePP, Timestamp timeStampEntrata) throws SQLException {
@@ -1544,6 +1593,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         while(rs.next()){
             numeroCoda = rs.getInt(1);
         }
+        connection.close();
         return numeroCoda;
     }
 
@@ -1576,6 +1626,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        connection.close();
     }
 
     private LocalTime getOrarioSlot(String slotPrenotazione) {
@@ -1625,6 +1676,7 @@ String tipoPassaporto = result.getTipoPassaporto();
                 return true;
             }
         }
+        connection.close();
         return false;
     }
 
@@ -1680,6 +1732,7 @@ String tipoPassaporto = result.getTipoPassaporto();
                 return true;
             }
         }
+        connection.close();
         return false;
     }
 
@@ -1707,6 +1760,7 @@ String tipoPassaporto = result.getTipoPassaporto();
         while(rs.next()){
             dataRitiro = rs.getDate(1).toLocalDate();
         }
+        connection.close();
         return dataRitiro;
     }
 
@@ -1808,6 +1862,11 @@ String tipoPassaporto = result.getTipoPassaporto();
                 return true;
             }
         }
+        connection.close();
         return false;
+    }
+
+    public String getSedeAddetto() {
+        return addettoModel.getCodiceSede();
     }
 }

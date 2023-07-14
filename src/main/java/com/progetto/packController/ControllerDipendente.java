@@ -591,7 +591,7 @@ public class ControllerDipendente implements Initializable {
         choiceBoxContrattoNuovoDipendente.setItems(contratti);
     }
 
-    private void setPassaportoRitiro(String cfCittadino) {
+    private void setPassaportoRitiro(String cfCittadino) throws SQLException {
         this.model.getPassaportoRitiro(cfCittadino);
     }
 
@@ -623,6 +623,7 @@ public class ControllerDipendente implements Initializable {
 
         vboxAccSlot.getChildren().clear();
 
+        System.out.println(datePickerSlot.getValue());
         ResultSet rs = this.model.getAnteprimaSlot(datePickerSlot.getValue());
 
         if (rs == null) {
@@ -659,7 +660,11 @@ public class ControllerDipendente implements Initializable {
                     if (slotPresente) {
                         startPresenzaSlotAlert();
                     } else {
-                        this.model.inserisciAppuntamento(codiceSede, data, hslot, serv, numslot);
+                        try {
+                            this.model.inserisciAppuntamento(codiceSede, data, hslot, serv, numslot);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                     ins.setMouseTransparent(true);
                     ins.setOpacity(0.5);
@@ -691,6 +696,8 @@ public class ControllerDipendente implements Initializable {
         LocalDate date = datePickerSlot.getValue();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE", new Locale("it", "IT"));
         gg = date.format(formatter);
+        System.out.println(dataSlot + " "+gg);
+
         boolean check = this.model.checkPresenzaData(dataSlot);
         boolean dataValida = this.model.checkValiditaData(dataSlot, gg.toUpperCase());
 
@@ -812,10 +819,19 @@ public class ControllerDipendente implements Initializable {
                         no.setOpacity(0.5);
                         modificaScelta.setMouseTransparent(true);
                         modificaScelta.setOpacity(0.5);
-                        boolean dispPresenza = this.model.checkAddettoDisponibilita(mat, dataSlot);
+                        boolean dispPresenza = false;
+                        try {
+                            dispPresenza = this.model.checkAddettoDisponibilita(mat, dataSlot);
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
+                        }
 
                         if (!dispPresenza) {
-                            this.model.insertDisponibilita(mat, dataSlot, sceltaDipSlot);
+                            try {
+                                this.model.insertDisponibilita(mat, dataSlot, sceltaDipSlot);
+                            } catch (SQLException ex) {
+                                throw new RuntimeException(ex);
+                            }
                         } else {
                             startPresenzaAlert();
                             modificaScelta.setMouseTransparent(true);
@@ -1160,8 +1176,12 @@ public class ControllerDipendente implements Initializable {
                 }
 
                 if (checkerMail && telephoneChecker) {
-                    this.model.insertNuovoDipendente(labelMatricolaGenerataNuovoDipendente.getText(), fieldNomeNuovoDipendente.getText(), fieldCognomeNuovoDipendente.getText(), choiceBoxContrattoNuovoDipendente.getValue(),
-                            fieldTelefonoAziendaleNuovoDipendente.getText(), fieldMailNuovoDipendente.getText(), pwdGenerata);
+                    try {
+                        this.model.insertNuovoDipendente(labelMatricolaGenerataNuovoDipendente.getText(), fieldNomeNuovoDipendente.getText(), fieldCognomeNuovoDipendente.getText(), choiceBoxContrattoNuovoDipendente.getValue(),
+                                fieldTelefonoAziendaleNuovoDipendente.getText(), fieldMailNuovoDipendente.getText(), pwdGenerata);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     startSuccessAlert("inserimento nuovo dipendente, " + labelNomeNuovoDipendente.getText() + " " + labelCognomeNuovoDipendente.getText() + " " + labelMatricolaGenerataNuovoDipendente.getText());
                     buttonGeneraMatricolaNuovoDipendente.setVisible(false);
                     buttonGeneraPasswordNuovoDipendente.setVisible(false);
@@ -1319,7 +1339,11 @@ public class ControllerDipendente implements Initializable {
                     int scegliAzione = mostraOpzioniAzione("Questo giorno presenta già questo turno. Come desideri proseguire?", opzione);
                     if(scegliAzione==0){
                         startSuccessAlert("cancellazione turno");
-                        this.model.deleteTurnoDipendente(matricola, Turno.getValue(), Giorno.getValue());
+                        try {
+                            this.model.deleteTurnoDipendente(matricola, Turno.getValue(), Giorno.getValue());
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                 } else {
                     try {
@@ -1438,23 +1462,35 @@ public class ControllerDipendente implements Initializable {
                     entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, dettagliP);
                 }
                 gestisciButton.setOnAction((e) -> {
+                    String codice_sede;
                     try {
-                        this.model.updateSchedaPrenotazione(String.valueOf(id));
-                        this.model.getInfoCittadino(cfCittadino);
+                        codice_sede = this.model.getNSede(csede);
                     } catch (SQLException ex) {
                         throw new RuntimeException(ex);
                     }
-                    Parent root = null;
-                    try {
-                        root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestisci-prenotazione-view.fxml"));
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+                    System.out.println(codice_sede + " " + this.model.getSedeAddetto());
+                    if(codice_sede.equals(this.model.getSedeAddetto())) {
+                        try {
+                            this.model.updateSchedaPrenotazione(String.valueOf(id));
+                            this.model.getInfoCittadino(cfCittadino);
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Parent root = null;
+                        try {
+                            root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestisci-prenotazione-view.fxml"));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Stage secondaryStage = new Stage();
+                        Scene scene2 = new Scene(root);
+                        secondaryStage.setScene(scene2);
+                        secondaryStage.setResizable(false);
+                        secondaryStage.show();
+                    } else {
+                        startAlertPrendiCarico();
                     }
-                    Stage secondaryStage = new Stage();
-                    Scene scene2 = new Scene(root);
-                    secondaryStage.setScene(scene2);
-                    secondaryStage.setResizable(false);
-                    secondaryStage.show();
+
                 });
                 c.add(serv); //servizio c.get(0)
                 c.add(String.valueOf(id));  // id prenotazione c.get(1)
@@ -1479,6 +1515,14 @@ public class ControllerDipendente implements Initializable {
             ScrollPaneAttive.setContent(vboxpattive);
         }
         ScrollPaneAttive.setContent(vboxpattive);
+    }
+
+    private void startAlertPrendiCarico() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore!");
+        alert.setHeaderText("Operazione non concessa");
+        alert.setContentText("Non è possibile prendere in carico questa prenotazione perché non fa riferimento alla sua sede di lavoro.\nSelezionare una prenotazione riferita alla sua sede di lavoro.");
+        alert.showAndWait();
     }
 
     private void popUpDettagli(String serv, int id, String cfCittadino) throws SQLException {

@@ -627,7 +627,7 @@ public class ControllerCittadino implements Initializable {
     }
 
     @FXML
-    private void openCalendarApp(ActionEvent e){
+    private void openCalendarApp(ActionEvent e) throws SQLException {
         HAS_ENTERED = true;
 
         int numeroCoda;
@@ -664,6 +664,8 @@ public class ControllerCittadino implements Initializable {
 
         if(numeroCoda>0){
             startTimerCoda(numeroCoda);
+            buttonIndietroPrenotazioneIntermedia.setOpacity(0.5);
+            buttonIndietroPrenotazioneIntermedia.setMouseTransparent(true);
         } else {
             try {
                 openCalendar(e);
@@ -1068,7 +1070,11 @@ public class ControllerCittadino implements Initializable {
         comboBoxServizio.setItems(serviziPrenotazioni);
 
         buttonAggiornaCoda.setOnAction(e->{
-            openCalendarApp(e);
+            try {
+                openCalendarApp(e);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         confermaPrenotazioneServizioSede.setOpacity(0.5);

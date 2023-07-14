@@ -23,48 +23,48 @@ import java.util.Collection;
 import java.util.ResourceBundle;
 
 public class ControllerRegistrazione implements Initializable {
-    private boolean isShowPwd = false;
+    boolean isShowPwd = false;
     private static Collection<String> c = new ArrayList<>();
-    private final Model model = Model.getInstance();
+    final Model model = Model.getInstance();
 
     @FXML
-    private TextField cfUtente;
+    TextField cfUtente;
     @FXML
-    private RadioButton showPwd = new RadioButton();
+    RadioButton showPwd = new RadioButton();
 
     @FXML
-    private ChoiceBox<String> choiceBox = new ChoiceBox<>();
+    ChoiceBox<String> choiceBox = new ChoiceBox<>();
 
     @FXML
-    private TextField cittaUtente = new TextField();
+    TextField cittaUtente = new TextField();
 
     @FXML
-    private TextField cognomeUtente = new TextField();
+    TextField cognomeUtente = new TextField();
 
     @FXML
-    private Button confermabutton;
+    Button confermabutton;
 
     @FXML
-    private DatePicker dataNascita = new DatePicker();
+    DatePicker dataNascita = new DatePicker();
 
     @FXML
-    private TextField hiddenTextfield;
+    TextField hiddenTextfield;
 
     @FXML
-    private TextField mailUtente = new TextField();
+    TextField mailUtente = new TextField();
 
     @FXML
-    private TextField nomeUtente = new TextField();
+    TextField nomeUtente = new TextField();
 
     @FXML
-    private PasswordField passwordUtente = new PasswordField();
+    PasswordField passwordUtente = new PasswordField();
 
     @FXML
-    private TextField statoUtente = new TextField();
+    TextField statoUtente = new TextField();
     @FXML
-    private GridPane gridPane = new GridPane();
+    GridPane gridPane = new GridPane();
     @FXML
-    private TextField tessSanitaria = new TextField();
+    TextField tessSanitaria = new TextField();
 
     @FXML
     void indietro(ActionEvent eventIndietro) throws IOException {
@@ -77,7 +77,7 @@ public class ControllerRegistrazione implements Initializable {
     }
 
     @FXML
-    private void checkInputs(ActionEvent actionEvent) throws SQLException, NoSuchAlgorithmException {
+    void checkInputs(ActionEvent actionEvent) throws SQLException, NoSuchAlgorithmException {
         c = this.model.checkRegistrazione(nomeUtente.getText(), cognomeUtente.getText(), dataNascita.getValue(),
                 cittaUtente.getText(), statoUtente.getText(), cfUtente.getText(), tessSanitaria.getText(), mailUtente.getText(),
                 passwordUtente.getText(), String.valueOf(choiceBox.getValue()));
@@ -96,7 +96,7 @@ public class ControllerRegistrazione implements Initializable {
         }
     }
 
-    private void startCittadinoAlert() {
+    void startCittadinoAlert() {
         Alert warningAlert = new Alert(Alert.AlertType.WARNING);
         warningAlert.setTitle("Mancata registrazione");
         warningAlert.setHeaderText("Dati già presenti");
@@ -107,7 +107,7 @@ public class ControllerRegistrazione implements Initializable {
         gridPane.setMouseTransparent(true);
     }
 
-    private void startAnagraficaAlert() {
+    void startAnagraficaAlert() {
         Alert warningAlert = new Alert(Alert.AlertType.WARNING);
         warningAlert.setTitle("Mancata registrazione");
         warningAlert.setHeaderText("Dati non presenti");
@@ -172,12 +172,12 @@ public class ControllerRegistrazione implements Initializable {
         showPwd.setOnAction(e -> checkShowPwd());
     }
 
-    private void checkShowPwd() {
+    void checkShowPwd() {
         isShowPwd = !isShowPwd;
         if(isShowPwd){ showHiddenPwd();}else{ hideHiddenPwd();}
     }
 
-    private void hideHiddenPwd() {
+    void hideHiddenPwd() {
         hiddenTextfield.setVisible(false);
         hiddenTextfield.toBack();
         passwordUtente.toFront();
