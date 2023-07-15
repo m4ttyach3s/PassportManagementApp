@@ -60,49 +60,36 @@ public class ControllerCittadino implements Initializable {
     private PasswordField passwordCittadino;
     @FXML
     private Label nomeUser = new Label();
-
     @FXML
     private ScrollPane ScrollPaneAttive;
-
     @FXML
     private ScrollPane ScrollPanePassate;
     @FXML
     private TitledPane PrenotazioniAttive = new TitledPane();
     @FXML
     private AnchorPane AnchorPane2 = new AnchorPane();
-
     @FXML
     private Label LabelCf = new Label();
-
     @FXML
     private Label LabelCognome = new Label();
-
     @FXML
     private Label LabelNome = new Label();
-
     @FXML
     private AnchorPane AnchorPane3 = new AnchorPane();
-
     @FXML
     private Label LabelCf2 = new Label();
-
     @FXML
     private Label LabelCognome2 = new Label();
-
     @FXML
     private Label LabelNome2 = new Label();
     @FXML
     private Button confermaModificaPassword = new Button();
-
     @FXML
     private Button confermaModificaMail = new Button();
-
     @FXML
     private Label labelNuovaMail = new Label();
-
     @FXML
     private Label labelNuovaPassword = new Label();
-
     @FXML
     private TextField nuovaMail = new TextField();
     @FXML
@@ -111,53 +98,42 @@ public class ControllerCittadino implements Initializable {
     private Button buttonModPwd = new Button();
     @FXML
     private Button buttonModMail = new Button();
-
     @FXML
     private Button buttonRilascio = new Button();
     @FXML
     private Button buttonRitiro = new Button();
-
     @FXML
     private Button indietroButtonPrenotazione = new Button();
-
     @FXML
     private RadioButton radioButtonPasswordModifica = new RadioButton();
-
     @FXML
     private ChoiceBox<String> comboBoxServizio = new ChoiceBox<>();
     @FXML
     private ChoiceBox<String> comboBoxSede = new ChoiceBox<>();
     @FXML
     private Button confermaPrenotazioneServizioSede = new Button();
-
     @FXML
     private Button scegliServizio = new Button();
     @FXML
     private Button buttonIndietroPrenotazioneIntermedia = new Button();
-
     private static int count = 0;
-    ZonedDateTime dateFocus; // Focus date for the calendar
-    ZonedDateTime today; // Current date
-
+    ZonedDateTime dateFocus;
+    ZonedDateTime today;
     @FXML
-    private Text year = new Text(); // Text element displaying the year
-
+    private Text year = new Text();
     @FXML
-    private Text month = new Text(); // Text element displaying the month
-
+    private Text month = new Text();
     @FXML
-    private FlowPane calendar = new FlowPane(); // FlowPane representing the calendar grid
+    private FlowPane calendar = new FlowPane();
     @FXML
     private Button backOne = new Button();
-
-    private static final int START_TIME = 8*60; // 5 minutes in seconds
+    private static final int START_TIME = 8*60;
     private int remainingTime;
     @FXML
     private Label labelTempoRimasto = new Label();
     private Timeline timeline;
     private String causaPassaporto;
     private boolean isTimerOver = false;
-
     @FXML
     private Label labelGrigia = new Label();
     private boolean isPrenotazioneClicked = false;
@@ -176,7 +152,6 @@ public class ControllerCittadino implements Initializable {
     private static String slotPrenotazione = new String();
     private static Timestamp TIME_STAMP_ENTRATA;
     private static String SERVIZIO_ENTRATA;
-
     private static Stage primaryStage;
     private boolean HAS_ENTERED;
     private boolean calendarLogicExecuted = false;
@@ -185,14 +160,10 @@ public class ControllerCittadino implements Initializable {
     @FXML
     private Button indietrohidden = new Button();
     private static String CAUSA_RILASCIO = new String();
-
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
     }
 
-    // -------- sezione apertura FXML ----------
-    //TODO
-    //  aggiungere timestamp
     @FXML
     void accediCittadino(ActionEvent eventAccediCittadino) throws SQLException, IOException, NoSuchAlgorithmException {
         boolean loginChecker = this.model.checkLogin(codiceFiscale.getText(), passwordCittadino.getText(), "cittadino");
@@ -277,16 +248,6 @@ public class ControllerCittadino implements Initializable {
 
 
     private void openCalendar(ActionEvent e) throws IOException {
-        /*
-        Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
-        Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-        ControllerCittadino.setPrimaryStage(stage);
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-
-         */
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
         if (stage == null) {
@@ -299,9 +260,6 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
-    // ---------- fine FXML
-
-    // ---------- Sezione ALERT ------------
     private void startAlertAnnullamento() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -366,12 +324,7 @@ public class ControllerCittadino implements Initializable {
         }
         alert.showAndWait();
     }
-// ------ fine ALERT ------
 
-
-    // --------- sezione METODI ---------
-
-    //      DVDFCC01D23M150F
     @FXML
     void prenotazioniAttive() throws SQLException {
         VBox vboxpattive = new VBox();
@@ -546,7 +499,7 @@ public class ControllerCittadino implements Initializable {
         confermaModificaPassword.setMouseTransparent(false);
     }
 
-    @FXML // --> to model
+    @FXML
     void updatePasswordCittadino(ActionEvent event) throws NoSuchAlgorithmException, SQLException {
         EncryptionPass encryptedPassword = new EncryptionPass();
         String pwd = encryptedPassword.setEncrypt(nuovaPassword.getText());
@@ -558,7 +511,7 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
-    @FXML // --> to model
+    @FXML
     void UpdateMailCittadino(ActionEvent event) throws SQLException {
 
         if(this.model.checkMail(nuovaMail.getText())) {
@@ -598,18 +551,18 @@ public class ControllerCittadino implements Initializable {
 
     @FXML
     void backOneMonth(ActionEvent event) throws SQLException {
-        dateFocus = dateFocus.minusMonths(1); // Move focus date one month back
-        calendar.getChildren().clear(); // Clear the calendar grid
-        drawCalendar(); // Draw the updated calendar
-        updateButtonStatus(backOne); // Update the button status after changing the date
+        dateFocus = dateFocus.minusMonths(1); // Muovi la focus date indietro di un mese
+        calendar.getChildren().clear(); // resetta il calendario
+        drawCalendar(); // ridisegna il calendario
+        updateButtonStatus(backOne); // aggiorna il pulsante
     }
 
     @FXML
     void forwardOneMonth(ActionEvent event) throws SQLException {
-        dateFocus = dateFocus.plusMonths(1); // Move focus date one month forward
-        calendar.getChildren().clear(); // Clear the calendar grid
-        drawCalendar(); // Draw the updated calendar
-        updateButtonStatus(backOne); // Update the button status after changing the date
+        dateFocus = dateFocus.plusMonths(1); // Muovi la focus date avanti di un mese
+        calendar.getChildren().clear(); // resetta il calendario
+        drawCalendar(); // ridisegna il calendario
+        updateButtonStatus(backOne); // aggiorna il pulsante
     }
 
     private void updateButtonStatus(Button button) {
@@ -617,7 +570,7 @@ public class ControllerCittadino implements Initializable {
     }
 
     private boolean canGoBack() {
-        ZonedDateTime initialDate = ZonedDateTime.now(); // Set the initial date
+        ZonedDateTime initialDate = ZonedDateTime.now(); // data iniziale
         return !dateFocus.isBefore(initialDate);
     }
 
@@ -682,9 +635,6 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
-    // TODO
-    //      Se la data e l'ora sono minori dell'ora e data attuale --> button in rosso
-    //      Se il button è rosso --> do not retrieve text.
     private void drawCalendar() throws SQLException {
         year.setText(String.valueOf(dateFocus.getYear())); // Set the year text
         month.setText(dateFocus.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN).toUpperCase());
@@ -696,34 +646,34 @@ public class ControllerCittadino implements Initializable {
         double spacingH = calendar.getHgap();
         double spacingV = calendar.getVgap();
 
-        int monthMaxDate = dateFocus.getMonth().maxLength(); // Get the maximum number of days in the month
-        // Check for leap year
+        int monthMaxDate = dateFocus.getMonth().maxLength(); // ottengo il numero di giorni massimi in un mese
+        // Controllo se è bisestile
         if (dateFocus.getYear() % 4 != 0 && monthMaxDate == 29) {
             monthMaxDate = 28;
         }
         int dateOffset = ZonedDateTime.of(dateFocus.getYear(), dateFocus.getMonthValue(), 1, 0, 0, 0, 0, dateFocus.getZone())
-                .getDayOfWeek().getValue(); // Get the day of the week offset for the first day of the month
+                .getDayOfWeek().getValue(); // Offset dei giorni del mese dal primo giorno del mese
 
-        for (int i = 0; i < 6; i++) { // Iterate over the calendar grid rows
-            for (int j = 0; j < 7; j++) { // Iterate over the calendar grid columns
-                StackPane stackPane = new StackPane(); // Create a stack pane for each calendar cell
-                Rectangle rectangle = new Rectangle(); // Create a rectangle element for the cell
+        for (int i = 0; i < 6; i++) { // Mi muovo lungo le righe del calendario
+            for (int j = 0; j < 7; j++) { // mi muovo lungo le colonne
+                StackPane stackPane = new StackPane(); // Creo uno stack pane PER OGNI cella del calendario
+                Rectangle rectangle = new Rectangle(); // Creo un rettangolo PER OGNI cella e stackpane
                 rectangle.setFill(Color.TRANSPARENT);
                 rectangle.setStroke(Color.BLACK);
                 rectangle.setStrokeWidth(strokeWidth);
-                double rectangleWidth = (calendarWidth / 7) - strokeWidth - spacingH; // Calculate the width of the rectangle
+                double rectangleWidth = (calendarWidth / 7) - strokeWidth - spacingH; // Devo calcolare la larghezza del rettangolo a seconda dei giorni presenti
                 rectangle.setWidth(rectangleWidth);
-                double rectangleHeight = (calendarHeight / 6) - strokeWidth - spacingV; // Calculate the height of the rectangle
+                double rectangleHeight = (calendarHeight / 6) - strokeWidth - spacingV; // Devo calcolare la lunghezza del rettangolo a seconda dei giorni presenti
                 rectangle.setHeight(rectangleHeight);
 
-                stackPane.getChildren().add(rectangle); // Add the rectangle to the stack pane
+                stackPane.getChildren().add(rectangle);
 
-                int calculatedDate = (j + 1) + (7 * i); // Calculate the date for the current cell
+                int calculatedDate = (j + 1) + (7 * i); // Calcola la data per ogni cella spostandola
                 Label data = new Label();
                 ArrayList<String> giorniRossi = new ArrayList<>();
-                if (calculatedDate > dateOffset) { // Check if the date is valid for the current month
-                    int currentDate = calculatedDate - dateOffset; // Calculate the current date of the month
-                    if (currentDate <= monthMaxDate) { // Check if the current date is within the valid range
+                if (calculatedDate > dateOffset) { // Controlla se la data è coerente con il mese corrente
+                    int currentDate = calculatedDate - dateOffset; // Trova il giorno attuale
+                    if (currentDate <= monthMaxDate) { //  Controlla se il giorno attuale rispetta il range di giorni del mese
                         data.setText(String.valueOf(currentDate));
                         data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
                         data.setPrefWidth(rectangleWidth);
@@ -737,7 +687,7 @@ public class ControllerCittadino implements Initializable {
 
                         ResultSet rs = this.model.getSlots(dateC, numSedePP, servPP);
                         int hasAllZeros = this.model.getZeroSlot(dateC, numSedePP, servPP);
-                        boolean hasSlots = rs.next(); // Flag to check if there are slots
+                        boolean hasSlots = rs.next(); // Flag per controllare se ci sono slots
                         boolean isEmpty = false;
 
                         // if numero posti <= 0 --> rosso
@@ -749,18 +699,16 @@ public class ControllerCittadino implements Initializable {
                             rectangle.toBack();
                         }
 
-                        VBox buttonContainer = new VBox(); // VBox to hold the buttons vertically
+                        VBox buttonContainer = new VBox(); // VBox per mettere gli slots verticalmente
                         int counter = 0;
                         if (hasSlots) {
                             do {
-                                //giorniRossi.clear();
-
                                 LocalTime slotHour = LocalTime.parse(rs.getString(1));
                                 Button button = new Button(trasformaOrario(String.valueOf(slotHour)));
                                 Label labelRed = new Label(trasformaOrario(rs.getString(1)));
 
                                 button.setText(trasformaOrario(rs.getString(1)));
-                                button.setMaxWidth(rectangleWidth - strokeWidth); // Set max width to fit within rectangle
+                                button.setMaxWidth(rectangleWidth - strokeWidth); // larghezza massima per ogni slots
 
 
                                 int slotsNumber = rs.getInt(2);
@@ -769,8 +717,6 @@ public class ControllerCittadino implements Initializable {
                                     rectangle.setFill(Paint.valueOf("#808080"));
                                     rectangle.toBack();
                                 }
-
-                                //if (slotsNumber <= 0 || (slotsNumber<=0 && slotHour.isBefore(LocalTime.now()))) {
 
                                 if (slotsNumber <= 0) {
                                     counter++;
@@ -815,22 +761,21 @@ public class ControllerCittadino implements Initializable {
 
                                 buttonContainer.setSpacing(5);
                                 buttonContainer.setStyle("-fx-background-color: transparent");
-                                //buttonContainer.setOpacity(0);
-                                buttonContainer.getChildren().add(button); // Add the button to the VBox
+                                buttonContainer.getChildren().add(button);
                             } while (rs.next());
                         }
 
                         if (hasSlots) {
-                            ScrollPane scrollPane = new ScrollPane(buttonContainer); // Wrap the VBox in a ScrollPane
+                            ScrollPane scrollPane = new ScrollPane(buttonContainer); // Wrapping del VBOX nel Scrollpane
                             scrollPane.setPrefWidth(rectangleWidth);
                             scrollPane.setPrefHeight(rectangleHeight);
-                            scrollPane.setFitToWidth(true); // Enable horizontal scrolling if necessary
-                            scrollPane.setFitToHeight(true); // Enable vertical scrolling if necessary
-                            stackPane.getChildren().addAll(scrollPane); // Add the scroll pane to the stack pane
+                            scrollPane.setFitToWidth(true);
+                            scrollPane.setFitToHeight(true);
+                            stackPane.getChildren().addAll(scrollPane);
                         }
 
                         if (dateC.getDayOfWeek() == DayOfWeek.SATURDAY || dateC.getDayOfWeek() == DayOfWeek.SUNDAY || dateC.isBefore(LocalDate.now())) {
-                            rectangle.setFill(Paint.valueOf("#808080"));
+                            rectangle.setFill(Paint.valueOf("#808080")); // se è sabato o domenica o il giorno è prima del giorno attuale --> grigio
                         }
                     }
                     if (today.getYear() == dateFocus.getYear() && today.getMonth() == dateFocus.getMonth()
@@ -839,14 +784,13 @@ public class ControllerCittadino implements Initializable {
                         data.setStyle("-fx-background-color: #add8e6; -fx-border-color: black");
                     }
                 } else {
-                    //Label data = new Label("    ");
                     data.setStyle("-fx-background-color: #f0fafc; -fx-border-color: black");
                     data.setPrefWidth(rectangleWidth);
                     data.setAlignment(Pos.CENTER);
                     data.setTranslateY(-(rectangleHeight) / 2 - 5);
                     stackPane.getChildren().add(data);
                 }
-                calendar.getChildren().add(stackPane); // Add the stack pane to the calendar grid
+                calendar.getChildren().add(stackPane);
             }
         }
     }
@@ -887,23 +831,11 @@ public class ControllerCittadino implements Initializable {
         stageSetBack = true;
 
         indietroButtonPrenotazione.fire();
-
-        /*
-        indietrohidden.setOnAction(e->{
-            try {
-                this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            try {
-                openPortaleCittadino(e);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });*/
     }
 
-    // to model
+    /**
+     * ignorare.
+     */
     private String trasformaOrario(String string) {
         String rs = new String();
 
@@ -955,33 +887,6 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
-    /*
-    @FXML
-    private void setConfermaPrenotazione(ActionEvent e) throws SQLException {
-        if((slotPrenotazione != null || !slotPrenotazione.equals("")) && giornoPrenotazione!=null){
-
-            if(RITIRO_TRENTA_GIORNI){
-                boolean checker = this.model.checkRitiro(giornoPrenotazione);
-                if(checker){
-                    this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
-                } else {
-                    startAlert("ritiro mancante");
-                }
-            }
-
-            // controllo 6 mesi.
-            this.model.setPrenotazione(numSedePP, giornoPrenotazione, slotPrenotazione, TIME_STAMP_ENTRATA, SERVIZIO_ENTRATA);
-            try {
-                startAzioneSuccess("slot");
-                openPortaleCittadino(e);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        } else {
-            startAlert("slot orario");
-        }
-    }
-*/
     @FXML
     void setConfermaPrenotazione(ActionEvent event) throws SQLException, IOException {
             boolean hasRitiro = this.model.checkRitiro(giornoPrenotazione);
@@ -1030,10 +935,6 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
-    // ---------- fine METODI
-
-    // -- !! INITIALIZE !! --
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         nomeUser.setText(this.model.getNome());
@@ -1054,9 +955,9 @@ public class ControllerCittadino implements Initializable {
         buttonModMail.setOnAction(e->checkEditMailButton());
         buttonModPwd.setOnAction(e->checkEditPwdButton());
 
-        dateFocus = ZonedDateTime.now(); // Set the focus date to the current date
-        today = ZonedDateTime.now(); // Set today's date
-        updateButtonStatus(backOne); // Update the initial button status
+        dateFocus = ZonedDateTime.now();
+        today = ZonedDateTime.now();
+        updateButtonStatus(backOne);
 
         comboBoxSede.setMouseTransparent(true);
         comboBoxSede.setOpacity(0.5);
@@ -1111,7 +1012,7 @@ public class ControllerCittadino implements Initializable {
         }
 
         try {
-            drawCalendar(); // Call drawCalendar once on the JavaFX Application Thread
+            drawCalendar();
             startTimer();
             calendarLogicExecuted = true;
         } catch (SQLException ex) {

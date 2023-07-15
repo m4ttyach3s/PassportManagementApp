@@ -28,6 +28,11 @@ public class ControllerFirstView implements Initializable {
     @FXML
     private Button registrati_prima;
 
+    /**
+     * Gestisce l'apertura della vista per l'accesso del cittadino
+     * @param eventAccediCittadino
+     * @throws IOException
+     */
     @FXML
     void accediCittadini(ActionEvent eventAccediCittadino) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/accedi-cittadino-view.fxml"));
@@ -38,6 +43,11 @@ public class ControllerFirstView implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce l'apertura della vista per l'accesso del dipendente
+     * @param eventAccediDipendente
+     * @throws IOException
+     */
     @FXML
     void accediDipendenti(ActionEvent eventAccediDipendente) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/accedi-dipendente-view.fxml"));
@@ -48,6 +58,11 @@ public class ControllerFirstView implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce l'apertura della vista per la registrazione dell'utente.
+     * @param eventRegistrazione
+     * @throws IOException
+     */
     @FXML
     void registrati(ActionEvent eventRegistrazione) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewRegistrazione/registrazione-view.fxml"));
@@ -58,6 +73,12 @@ public class ControllerFirstView implements Initializable {
         stage.show();
     }
 
+    /**
+     * Metodo initialize che ogni classe che implementa initializable deve avere. Inizializza gli elementi grafici e alcune
+     * variabili.
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         accedi_dipendenti.setStyle(IDLE_BUTTON_STYLE);
@@ -82,6 +103,10 @@ public class ControllerFirstView implements Initializable {
         registrati_prima.setOnMouseExited(e -> registrati_prima.setStyle(IDLE_BUTTON_STYLE));
     }
 
+    /**
+     * Gestisce graficamente le animazioni dei tre button presenti nella prima vista.
+     * @param button
+     */
     private void playAnimations(Button button) {
         ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.2), button);
         scaleTransition.setToX(1.05);
@@ -91,6 +116,11 @@ public class ControllerFirstView implements Initializable {
 
         scaleTransition.play();
     }
+
+    /**
+     * Metodo per settare il model
+     * @param model
+     */
     protected void setModel(Model model) {
         this.model = model;
     }
