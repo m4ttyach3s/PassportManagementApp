@@ -206,8 +206,6 @@ public class ControllerCittadino implements Initializable {
             passwordCittadino.setText("");
             passwordCittadino.setPromptText("Password");
         }
-        // prendere time stamp > per prenotazione
-        // fare update db
     }
 
     private void openPortaleCittadino(ActionEvent eventAccediCittadino) throws IOException {
@@ -260,9 +258,6 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
-
-    // TODO
-    //  creare la classe Calendario con i pulsanti per gli orari
     @FXML
     void openPortalePrenotazioni(ActionEvent nP) throws IOException, SQLException {
 
@@ -988,7 +983,7 @@ public class ControllerCittadino implements Initializable {
     }
 */
     @FXML
-    private void setConfermaPrenotazione(ActionEvent event) throws SQLException, IOException {
+    void setConfermaPrenotazione(ActionEvent event) throws SQLException, IOException {
             boolean hasRitiro = this.model.checkRitiro(giornoPrenotazione);
             boolean hasScadenza = this.model.checkScadenzaPP();
             System.out.println("giorno prenotazione " + giornoPrenotazione);
@@ -1125,7 +1120,7 @@ public class ControllerCittadino implements Initializable {
     }
 
     @FXML
-    private void getCheckCittaServizio(ActionEvent e) throws SQLException {
+    void getCheckCittaServizio(ActionEvent e) throws SQLException {
         ArrayList<String> cittaServizio = new ArrayList<>();
         boolean isPrimoPassaporto = false;
         boolean isPassaportoInScadenza = false;

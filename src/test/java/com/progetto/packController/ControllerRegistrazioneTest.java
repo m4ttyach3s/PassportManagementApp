@@ -2,12 +2,10 @@ package com.progetto.packController;
 
 import com.progetto.packModel.Model;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
@@ -21,21 +19,12 @@ public class ControllerRegistrazioneTest {
     private ControllerRegistrazione controller;
     private Model mockModel = Model.getInstance();
 
-    @BeforeClass
-    public static void setUpClass() {
-        // Initialize JavaFX Toolkit
-        JFXPanel jfxPanel = new JFXPanel();
-    }
-
     @Before
     public void setUp() {
-        // Create an instance of the controller
         controller = new ControllerRegistrazione();
-
-        // Create a mock instance of the model
         mockModel = Model.getInstance();
 
-        // Initialize JavaFX components
+        // componenti javafx
         controller.cfUtente = new TextField();
         controller.showPwd = new RadioButton();
         controller.choiceBox = new ChoiceBox<>();
@@ -53,8 +42,7 @@ public class ControllerRegistrazioneTest {
     }
 
     @Test
-    public void testCheckInputs_WithValidData() throws SQLException, NoSuchAlgorithmException {
-        // Arrange
+    public void testCheckInputs_datiValidi() throws SQLException, NoSuchAlgorithmException {
         String nomeUtente = "Leonardo";
         String cognomeUtente = "Cardillo";
         String cittaUtente = "Crotone";
@@ -71,7 +59,6 @@ public class ControllerRegistrazioneTest {
         assertTrue(mockModel.isStatusAnagrafica());
         assertFalse(mockModel.isTabellaCittadino());
 
-        // Act
         controller.nomeUtente.setText(nomeUtente);
         controller.cognomeUtente.setText(cognomeUtente);
         controller.dataNascita.setValue(null);
@@ -86,7 +73,6 @@ public class ControllerRegistrazioneTest {
 
         controller.checkInputs(new ActionEvent());
 
-        // Assert
         assert(!(mockModel.checkRegistrazione(nomeUtente, cognomeUtente, null, cittaUtente, statoUtente,
                 cfUtente, tessSanitaria, mailUtente, passwordUtente, choiceBoxValue)).isEmpty());
         assertTrue(controller.confermabutton.isVisible());
@@ -94,15 +80,14 @@ public class ControllerRegistrazioneTest {
     }
 
     @Test
-    public void testCheckInputs_WithInvalidData() throws SQLException, NoSuchAlgorithmException {
-        // Arrange
+    public void testCheckInputs_datiNonValidi() throws SQLException, NoSuchAlgorithmException {
         String nomeUtente = "";
-        String cognomeUtente = "Doe";
+        String cognomeUtente = "Rossi";
         String cittaUtente = "Parigi";
-        String statoUtente = "Texas";
+        String statoUtente = "Roma";
         String cfUtente = "CFDDSS12F34Z678F";
         String tessSanitaria = "93841";
-        String mailUtente = "john.doe@example.com";
+        String mailUtente = "giovanni.rossi@example.com";
         String passwordUtente = "password";
         String choiceBoxValue = "Cittadino straniero residente in italia";
         Collection<String> validationResult = new ArrayList<>();
@@ -115,7 +100,6 @@ public class ControllerRegistrazioneTest {
         assertFalse(mockModel.isStatusAnagrafica());
         assertFalse(mockModel.isTabellaCittadino());
 
-        // Act
         controller.nomeUtente.setText(nomeUtente);
         controller.cognomeUtente.setText(cognomeUtente);
         controller.dataNascita.setValue(null);
@@ -130,7 +114,6 @@ public class ControllerRegistrazioneTest {
 
         controller.checkInputs(new ActionEvent());
 
-        // Assert
         assert(mockModel.checkRegistrazione(nomeUtente, cognomeUtente, null, cittaUtente, statoUtente,
                 cfUtente, tessSanitaria, mailUtente, passwordUtente, choiceBoxValue)).isEmpty();
         assertFalse(controller.confermabutton.isVisible());

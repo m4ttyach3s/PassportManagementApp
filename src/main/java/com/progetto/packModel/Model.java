@@ -52,158 +52,82 @@ public class Model {
     private static boolean statusAnagrafica;
     private static boolean tabellaCittadino;
 
+    // costruttore
+    private Model(){this.connectDB = new ConnectDB();}
+
+    public static Model getInstance() {
+        if (model == null) {model = new Model();}
+        return model;
+    }
+    // --- sezione getters
     public static String getCFCittadino() {
         return CFCittadino;
     }
-
     public static String getNomeCittadino() {
         return nomeCittadino;
     }
-
     public static String getCognomeCittadino() {
         return cognomeCittadino;
     }
-
     public static String getLuogoNCittadino() {
         return luogoNCittadino;
     }
-
     public static String getDataNCittadino() {
         return dataNCittadino;
     }
-
     public static String getStatoNCittadino() {
         return statoNCittadino;
     }
-
-    public static String getTutore1Cittadino() {
-        return tutore1Cittadino;
-    }
-
-    public static String getTutore2Cittadino() {
-        return tutore2Cittadino;
-    }
-
-    public static String getMailCittadino() {
-        return mailCittadino;
-    }
-
-    public static String getNumero_passaporto() {
-        return numero_passaporto;
-    }
-
-    public static String getTipo_passaporto() {
-        return tipo_passaporto;
-    }
-
+    public static String getMailCittadino() {return mailCittadino;}
     public static String getCategoriaCittadino() {
         return categoriaCittadino;
     }
-
     public static String getTessSanitariaCittadino() {
         return tessSanitariaCittadino;
     }
-
-    // costruttore
-    /*public Model() {
-        this.Nome = new String();
-        this.Cognome = new String();
-        this.Sede = new String();
-        this.Ruolo = new String();
-        this.codiceSede = new String();
-
-        this.connectDB = new ConnectDB();
-
-        this.CFCittadino = new String();
-        this.nomeCittadino = new String();
-        this.cognomeCittadino = new String();
-        this.luogoNCittadino = new String();
-        this.dataNCittadino = new String();
-        this.statoNCittadino = new String();
-        this.categoriaCittadino = new String();
-        this.mailCittadino = new String();
-        this.tutore1Cittadino = new String();
-        this.tutore2Cittadino = new String();
-        this.tessSanitariaCittadino = new String();
-
-        this.idPrenotazione = new String();
-        this.numero_passaporto = new String();
-        this.tipo_passaporto = new String();
-        statusAnagrafica = false;
-        tabellaCittadino = false;
-
-
-    }*/
-
-
-    private Model(){
-        this.connectDB = new ConnectDB();
-    }
-
-    public static Model getInstance() {
-        if (model == null) {
-            model = new Model();
-        }
-
-        return model;
-    }
-
-
-    // ----------- Sezione Getters -----------
     public String getId() {
         return id;
     }
-
     public String getNome() {
         return Nome;
     }
-
     public String getCognome() {
         return Cognome;
     }
-
     public String getSede() {
         return Sede;
     }
-
     public String getRuolo() {
         return Ruolo;
     }
-
-    public String getIdPrenotazione() {
-        return idPrenotazione;
-    }
-
     public static String getCodiceSede() {
         return codiceSede;
     }
-
-    public static Collection<String> getC() {
-        return c;
-    }
-
     public static boolean isStatusAnagrafica() {
         return statusAnagrafica;
     }
-
     public boolean isTabellaCittadino() {
         return tabellaCittadino;
     }
-
-
     // ------------- Fine Getters ------------
 
-    // ----------- Sezione Setters -----------
 
+    // ----------- Sezione Setters -----------
     public static void setModel(Model model) {
         Model.model = model;
     }
 
     // ------------- Fine Setters ------------
 
+
     // ----------- Sezione Metodi -----------
 
-    // ----------- METODI PER LE QUERY -----------
+    /**
+     * Stabilisce la connessione tra il database, model e controller ed esegue le query ritenute safe da SQL injection.
+     * @param query
+     * @return ResultSet
+     * @throws SQLException
+     */
     public ResultSet setConnection(String query) throws SQLException {
         this.connection = connectDB.getConnection();
         ResultSet rs = null;
@@ -217,8 +141,16 @@ public class Model {
 
         return rs;
     }
-
-    // ---------------- METODO CONDIVISO DA CITTADINO E DIPENDENTE
+    
+    /**
+     * Metodo per CITTADINO e DIPENDENTE per controllare l'integrità tra username e password con i dati presenti nel DB.
+     * Discrimina tra la classe Cittadino e la classe Dipendente.
+     * @param ID
+     * @param password
+     * @param table
+     * @return true, if present. false, not present.
+     * @throws NoSuchAlgorithmException
+     */
     public boolean checkLogin(String ID, String password, String table) throws NoSuchAlgorithmException {
         EncryptionPass encryptedPassword = new EncryptionPass();
         String enpassword = encryptedPassword.setEncrypt(password);
@@ -267,6 +199,11 @@ public class Model {
         return result;
     }
 
+    /**
+     * Metodo per DIPENDENTE per ottenere il codice sede assegnato all'addetto.
+     * @param id
+     * @return string con il codice della sede.
+     */
     private String getAddettoCodiceSede(String id) {
         String querySede = "SELECT \"sedeLavoro\" FROM public.addetto, public.sede WHERE \"sedeLavoro\" = codice AND matricola = '" + id + "'";
         ResultSet rs;
@@ -282,7 +219,10 @@ public class Model {
         return codice;
     }
 
-    // -------- METODI PER IL CITTADINO ---------
+    /**
+     * Metodo per CITTADINO per ottenere le sue prenotazioni attive.
+     * @return ResultSet con le prenotazioni.
+     */
     public ResultSet getPrenotazioniAttive() {
         String CF = cittadinoModel.getCodiceFiscale();
         String query = "SELECT \"ID\", città, giorno, ora, servizio, \"causaRilascio\", \"codSede\" " +
@@ -297,6 +237,10 @@ public class Model {
         return rs;
     }
 
+    /**
+     * Metodo per CITTADINO per ottenere le sue prenotazioni passate.
+     * @return ResultSet con le prenotazioni
+     */
     public ResultSet getPrenotazioniPassate() {
         String CF = cittadinoModel.getCodiceFiscale();
         String query = "SELECT \"ID\", città, giorno, ora, servizio,  \"causaRilascio\"," +
@@ -312,6 +256,15 @@ public class Model {
         return rs;
     }
 
+    /**
+     * Metodo per CITTADINO per annullare una prenotazione.
+     * @param id
+     * @param giorno
+     * @param ora
+     * @param codSede
+     * @return true, if deleted. false, if not.
+     * @throws SQLException
+     */
     public boolean annullaPrenotazioneAttive(String id, Date giorno, Time ora, String codSede) throws SQLException {
         String query = "BEGIN;\n" +
                 "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n" +
@@ -340,14 +293,23 @@ public class Model {
         }
     }
 
+    /**
+     * Metodo per CITTADINO per la generazione del pdf della prenotazione.
+     * @param lista
+     * @param servizio
+     * @param causaR
+     */
     public void makePDF(List<String> lista, String servizio, String causaR) {
         String name = new String("PDF_Passaporto_" + getId() + "_" + lista.get(0) + causaR + ".pdf");
         PDFGenerator pdfGenerator = new PDFGenerator(name);
         pdfGenerator.makePDF(lista, servizio, causaR);
     }
 
-    // -------- METODI PER IL DIPENDENTE ---------
-
+    /**
+     * Metodo per DIPENDENTE per controllare il suo ruolo.
+     * @param matricolaDipendente
+     * @return true, if admin. false, if employee.
+     */
     public boolean dipendenteCheck(String matricolaDipendente) {
         String query = "SELECT COUNT(*)\n" +
                 "FROM public.sede\n" +
@@ -372,6 +334,9 @@ public class Model {
         return false;
     }
 
+    /**
+     * Metodo per DIPENDENTE per ottenere la città di qualsiasi dipendente desiderato.
+     */
     public void getDipSede() {
         String querySede = "SELECT città, \"sedeLavoro\" FROM public.addetto, public.sede WHERE \"sedeLavoro\" = codice AND matricola = '" + id + "'";
         ResultSet rs;
@@ -386,12 +351,33 @@ public class Model {
         }
     }
 
-
-    // -------- METODI PER LA REGISTRAZIONE ---------
+    /**
+     * Metodo condiviso da REGISTRAZIONE e CITTADINO per il controllo di integrità della password inserita e/o cambio password.
+     * @param pwd
+     * @return true, if it matches with regex. false, if not.
+     */
     public boolean checkPassword(String pwd) {
         return textPattern.matcher(pwd).matches() && pwd.length() >= 10;
     }
 
+    /**
+     * Metodo per REGISTRAZIONE per il controllo di integrità dei dati inseriti tramite una Collection<String>.
+     * Controlla se la persona è presente in public.anagrafica oppure in public.cittadino. Se è presente in public.anagrafica
+     * permette l'inserimento in public.cittadino. Se è presente in public.anagrafica & public.cittadino, mostra pop-up di alert.
+     * Se non è presente in public.anagrafica, mostra pop-up di alert di diverso tipo.
+     * @param nome
+     * @param cognome
+     * @param data
+     * @param citta
+     * @param stato
+     * @param cf
+     * @param tesssanitaria
+     * @param mail
+     * @param pwd
+     * @param categoria
+     * @return Collection<String> con i valori non corretti.
+     * @throws SQLException
+     */
     public Collection<String> checkRegistrazione(String nome, String cognome, LocalDate data, String citta, String stato, String cf, String tesssanitaria, String mail, String pwd, String categoria) throws SQLException {
         if (nome.equals("")) {
             c.add("Nome");
@@ -433,6 +419,16 @@ public class Model {
         return c;
     }
 
+    /**
+     * Metodo per REGISTRAZIONE utilizzato da checkRegistrazione per il controllo di integrità dei dati nella tabella public.cittadino.
+     * @param cf
+     * @param cognome
+     * @param nome
+     * @param data
+     * @param citta
+     * @param stato
+     * @return true, if present. false, if not.
+     */
     private boolean checkSchedaCittadino(String cf, String cognome, String nome, LocalDate data, String citta, String stato) {
         String query = "SELECT COUNT(\"CF\")\n" +
                 "\tFROM public.cittadino\n" +
@@ -451,6 +447,11 @@ public class Model {
         return false;
     }
 
+    /**
+     * Metodo per REGISTRAZIONE per controllare che il codice fiscale sia composto nel modo corretto.
+     * @param cf
+     * @return true, if matches. false, if not.
+     */
     private boolean checkCF(String cf) {
         String pattern = "\\w{6}\\d{2}\\w\\d{2}\\w\\d{3}\\w"; // uso per comparare con il mio input
         Pattern regex = Pattern.compile(pattern); // registro
@@ -463,6 +464,12 @@ public class Model {
         return false;
     }
 
+    /**
+     * Metodo per REGISTRAZIONE per il controllo di integrità della data per il metodo checkRegistrazione. Controlla
+     * se il cittadino è minorenne o maggiorenne.
+     * @param data
+     * @return true, if user is of age. false, if not.
+     */
     private boolean checkDataValida(LocalDate data) {
         Period etaCalcolata = Period.between(data, LocalDate.now());
         if (etaCalcolata.getYears() >= 18 && etaCalcolata.getYears() <= 110) {
@@ -471,12 +478,28 @@ public class Model {
         return false;
     }
 
+    /**
+     * Metodo condiviso da REGISTRAZIONE e CITTADINO per il controllo della mail. La stringa deve contenere solo determinati
+     * caratteri specificati in un registro e deve mantenere una struttura specificata in un pattern.
+     * @param s
+     * @return true, if it matches. false, if not.
+     */
     public boolean checkMail(String s) {
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(s);
         return matcher.matches();
     }
 
+    /**
+     * Metodo per REGISTRAZIONE per controllare la presenza dell'utente in public.anagrafica
+     * @param CF
+     * @param cognome
+     * @param nome
+     * @param dataN
+     * @param luogoN
+     * @param stato
+     * @return true, if present. false, if not.
+     */
     private boolean checkSchedaAnagrafica(String CF, String cognome, String nome, LocalDate dataN, String luogoN, String stato) {
 
         if (dataN == null) {
@@ -499,6 +522,20 @@ public class Model {
         return false;
     }
 
+    /**
+     * Metodo per REGISTRAZIONE per l'inserimento dei dati dell'utente nella tabella public.cittadino.
+     * @param nome
+     * @param cognome
+     * @param data
+     * @param citta
+     * @param tesssanitaria
+     * @param stato
+     * @param cf
+     * @param mail
+     * @param pwd
+     * @param categoria
+     * @throws NoSuchAlgorithmException
+     */
     public void insertDatiCittadino(String nome, String cognome, LocalDate data, String citta, String tesssanitaria, String stato, String cf, String mail, String pwd, String categoria) throws NoSuchAlgorithmException {
         EncryptionPass encryptedPassword = new EncryptionPass();
         String password = encryptedPassword.setEncrypt(pwd);
@@ -521,6 +558,12 @@ public class Model {
         }
     }
 
+    /**
+     * Metodo per CITTADINO per aggiornare/modifica la password.
+     * @param id
+     * @param pwd
+     * @throws SQLException
+     */
     public void updateCittadinoPassword(String id, String pwd) throws SQLException {
         String query = "UPDATE public.cittadino SET password = ? WHERE \"CF\" = ?";
         connection = connectDB.getConnection();
@@ -533,6 +576,12 @@ public class Model {
         }
     }
 
+    /**
+     * Metodo per CITTADINO per aggiornare/modificare la mail.
+     * @param id
+     * @param text
+     * @throws SQLException
+     */
     public void updateCittadinoMail(String id, String text) throws SQLException {
         connection = connectDB.getConnection();
         String query = "UPDATE public.cittadino SET email = ? WHERE \"CF\" = ?";
@@ -545,6 +594,11 @@ public class Model {
         }
     }
 
+    /**
+     * Metodo per DIPENDENTE per visualizzare le prenotazioni per data.
+     * @param giornoDP
+     * @return ResultSet con prenotazioni.
+     */
     public ResultSet showPrenotazioniDatePicker(String giornoDP) {
         ResultSet rs = null;
         try {
@@ -563,6 +617,11 @@ public class Model {
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per visualizzare le prenotazioni per il giorno odierno.
+     * @param now
+     * @return ResultSet con prenotazioni.
+     */
     public ResultSet showPrenotazioniOdierne(LocalDate now) {
         ResultSet rs = null;
         try {
@@ -579,6 +638,10 @@ public class Model {
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per visualizzare tutte le prenotazioni eseguite dall'addetto che ha svolto l'accesso.
+     * @return ResultSet con prenotazioni.
+     */
     public ResultSet showTuttePrenotazioni() {
         ResultSet rs = null;
         try {
@@ -593,6 +656,11 @@ public class Model {
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per visualizzare le prenotazioni con un ID specifico.
+     * @param idInserito
+     * @return ResultSet con prenotazioni.
+     */
     public ResultSet getPrenotazioniID(Integer idInserito) {
         ResultSet rs = null;
         try {
@@ -608,6 +676,11 @@ public class Model {
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per visualizzare le informazioni dell'utente riguardo alla sua prenotazione.
+     * @param cfCittadino
+     * @throws SQLException
+     */
     public void getInfoCittadino(String cfCittadino) throws SQLException {
         ResultSet rs = null;
         this.connection = connectDB.getConnection();
@@ -630,14 +703,16 @@ public class Model {
             dataNCittadino = rs.getString("dataN");
             mailCittadino = rs.getString("email");
             tessSanitariaCittadino = rs.getString("tessSanitaria");
-            //tutore1Cittadino = rs.getString("tutore1");
-            //tutore2Cittadino = rs.getString("tutore2");
             categoriaCittadino = rs.getString("categoria");
         }
 
         connection.close();
     }
 
+    /**
+     * Metodo per DIPENDENTE per aggiornare lo stato della prenotazione, ie l'addetto prende in carico la prenotazione.
+     * @param idPrenotazione
+     */
     public void updateSchedaPrenotazione(String idPrenotazione) {
         try {
             String query = "UPDATE public.prenotazione SET stato = 'in Esecuzione', \"matricolaAddetto \"= ? WHERE \"ID\" = ?";
@@ -652,88 +727,11 @@ public class Model {
 
     }
 
-    // TODO
-    // classe esterna! devi crearle..
-    /*
-    public class PassaportiCittadinoResult {
-    private ResultSet resultSet;
-    private String numeroPassaporto;
-    private String tipoPassaporto;
-
-    public PassaportiCittadinoResult(ResultSet resultSet, String numeroPassaporto, String tipoPassaporto) {
-        this.resultSet = resultSet;
-        this.numeroPassaporto = numeroPassaporto;
-        this.tipoPassaporto = tipoPassaporto;
-    }
-
-    public ResultSet getResultSet() {
-        return resultSet;
-    }
-
-    public String getNumeroPassaporto() {
-        return numeroPassaporto;
-    }
-
-    public String getTipoPassaporto() {
-        return tipoPassaporto;
-    }
-}
-
-public PassaportiCittadinoResult getPassaportiCittadino() throws SQLException {
-    ResultSet rs = null;
-    String numeroPassaporto = null;
-    String tipoPassaporto = null;
-
-    try {
-        String query = "SELECT numero, tipo, \"dataScadenza\", stato, \"IDrilascio\", \"IDritiro\" FROM public.passaporto " +
-                "WHERE \"CFcittadino\" = ? ORDER BY \"dataScadenza\" DESC";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, CFCittadino);
-        rs = statement.executeQuery();
-
-        if (rs.next()) {
-            numeroPassaporto = rs.getString("numero");
-            tipoPassaporto = rs.getString("tipo");
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-
-    return new PassaportiCittadinoResult(rs, numeroPassaporto, tipoPassaporto);
-}
-PassaportiCittadinoResult result = getPassaportiCittadino();
-ResultSet rs = result.getResultSet();
-String numeroPassaporto = result.getNumeroPassaporto();
-String tipoPassaporto = result.getTipoPassaporto();
-
-// Do something with the ResultSet and the extracted values
-// e.g., iterate over the ResultSet or use the values in some logic
-
+    /**
+     * Metodo per DIPENDENTE per mostrare tutti i passaporti posseduti dall'utente fino a quel momento.
+     * @return List<Passaporto>
+     * @throws SQLException
      */
-
-    /*
-    public ResultSet getPassaportiCittadino() throws SQLException {
-
-        ResultSet rs = null;
-        try {
-            String query = "SELECT numero, tipo, \"dataScadenza\", stato, \"IDrilascio\", \"IDritiro\" FROM public.passaporto " +
-                    "WHERE \"CFcittadino\" = ? ORDER BY \"dataScadenza\" DESC";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, cittadinoModel.getCodiceFiscale());
-            rs = statement.executeQuery();
-            while (rs.next()) {
-                numero_passaporto = rs.getString("numero");
-                tipo_passaporto = rs.getString("tipo");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return rs;
-    }
-
-     */
-
     public List<Passaporto> getPassaportiCittadino() throws SQLException {
         List<Passaporto> passaportiList = new ArrayList<>();
 
@@ -762,6 +760,10 @@ String tipoPassaporto = result.getTipoPassaporto();
         return passaportiList;
     }
 
+    /**
+     * Metodo per DIPENDENTE per aggiornare lo stato di una prenotazione quando è terminata.
+     * @param idPrenotazione
+     */
     public void updateTerminePrenotazioni(String idPrenotazione) {
         try {
             String query = "UPDATE public.prenotazione SET stato = 'Terminata' WHERE \"ID\" = ?";
@@ -773,6 +775,10 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
     }
 
+    /**
+     * Metodo per DIPENDENTE per aggiornare lo stato di una prenotazione, quando l'addetto non vuole più eseguirla.
+     * @param idPrenotazione
+     */
     public void updateRinunciaPrenotazioni(String idPrenotazione) {
         try {
             String query = "UPDATE public.prenotazione SET stato = 'Confermata', \"matricolaAddetto \"= null WHERE \"ID\" = ?";
@@ -784,20 +790,30 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
     }
 
+    /**
+     * Metodo per DIPENDENTE per ottenere la data di scadenza del passaporto relativo ad un cittadino.
+     * @return
+     */
     public String getDataScadenza() {
-
         String scadenza = String.valueOf(LocalDate.now().plusYears(10));
         passaportoModel.setDataScadenza(Date.valueOf(scadenza).toLocalDate());
-
         return scadenza;
     }
 
+    /**
+     * Metodo per DIPENDENTE generare un numero di passaporto univoco per un cittadino.
+     * @return String con numero generato.
+     */
     public String getNumeroPassaporto() {
         String numeroGenerato = generaNumeroPassaporto();
         passaportoModel.setNumero(numeroGenerato);
         return numeroGenerato;
     }
 
+    /**
+     * Metodo per DIPENDENTE che genera un nuovo numero passaporto.
+     * @return String con numero generato.
+     */
     private String generaNumeroPassaporto() {
         String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         int NUM_DIGITS = 7;
@@ -826,6 +842,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return numeroGenerato;
     }
 
+    /**
+     * Metodo per DIPENDENTE per la generazione del numero di passaporto. Controlla che i numeri siano univoci e non presenti
+     * all'interno del database.
+     * @param numeroGenerato
+     * @return #rows presenti nel DB.
+     */
     private int checkNumeriPP(String numeroGenerato) {
         int rows = 1;
         try {
@@ -844,6 +866,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         return rows;
     }
 
+    /**
+     * Metodo per DIPENDENTE per l'inserimento di un nuovo passaporto nel database.
+     * @param numeroPassaporto
+     * @param CFcitt
+     * @param tipoPassaporto
+     * @param dataSC
+     * @param ID
+     */
     public void insertNuovoPassaporto(String numeroPassaporto, String CFcitt, String tipoPassaporto, String dataSC, int ID) {
         passaportoModel.setNumero(numeroPassaporto);
         passaportoModel.setCfCittadino(CFcitt);
@@ -867,6 +897,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
     }
 
+    /**
+     * Metodo per DIPENDENTE per aggiornare lo stato di un passaporto quando viene ritirato.
+     * @param numPPR
+     * @param IDPP
+     */
     public void updateRitiroPP(String numPPR, int IDPP) {
         String query = "UPDATE public.passaporto SET \"IDritiro\" = ?, stato='ATTIVO' WHERE numero = ?";
         try {
@@ -879,6 +914,10 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
     }
 
+    /**
+     * Metodo per DIPENDENTE per vedere i passaporti dell'utente in stato di processo.
+     * @return ResultSet con passaporti.
+     */
     public ResultSet getPassaportiCittadinoRitiro() {
         ResultSet rs = null;
         try {
@@ -894,7 +933,12 @@ String tipoPassaporto = result.getTipoPassaporto();
 
     }
 
-
+    /**
+     * Metodo per DIPENDENTE per ottenere tutti i dati dei dipendenti che lavorano nella sede del responsabile.
+     * @param dataUpper
+     * @return ResultSet con dati dipendenti.
+     * @throws SQLException
+     */
     public ResultSet dipendentiData(String dataUpper) throws SQLException {
         ResultSet rs = null;
         this.connection = connectDB.getConnection();
@@ -915,6 +959,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per il controllo delle date. Controlla che le date non ricadano in periodi di festività,
+     * sabato e/o domenica, periodi di ferie ecc..
+     * @param dataSlot
+     * @param dataUpper
+     * @return true, if date is correct. false, if not.
+     */
     public boolean checkValiditaData(LocalDate dataSlot, String dataUpper) {
         LocalDate festaLavoro = LocalDate.of(dataSlot.getYear(), Month.MAY, 1);
         LocalDate festaRep = LocalDate.of(dataSlot.getYear(), Month.JUNE, 2);
@@ -946,6 +997,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE per inserire la data di lavoro all'interno del database.
+     * @param dataSlot
+     * @param dataUpper
+     * @throws SQLException
+     */
     public void insertDataMancante(LocalDate dataSlot, String dataUpper) throws SQLException {
         this.connection = connectDB.getConnection();
         try {
@@ -960,6 +1017,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per DIPENDENTE per controllare se la giornata selezionata abbia o meno slot.
+     * @param dataSlot
+     * @return true, if it has been inserted. false, if not.
+     * @throws SQLException
+     */
     public boolean checkPresenzaData(LocalDate dataSlot) throws SQLException {
         ResultSet rs = null;
         boolean checker = false;
@@ -983,6 +1046,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         return checker;
     }
 
+    /**
+     * Metodo per DIPENDENTE per l'inserimento della disponibilità di un addetto.
+     * @param mat
+     * @param dataSlot
+     * @param sceltaDipSlot
+     * @throws SQLException
+     */
     public void insertDisponibilita(String mat, LocalDate dataSlot, boolean sceltaDipSlot) throws SQLException {
 
         this.connection = connectDB.getConnection();
@@ -1000,6 +1070,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per DIPENDENTE per il controllo della presenza del dipendente in un determinato turno e giorno lavorativo.
+     * @param matricola
+     * @param dataSlot
+     * @return true, if it's not present. false, if it is.
+     * @throws SQLException
+     */
     public boolean checkAddettoDisponibilita(String matricola, LocalDate dataSlot) throws SQLException {
         ResultSet rs;
         this.connection = connectDB.getConnection();
@@ -1022,6 +1099,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
+    /**
+     * Metodo per DIPENDENTE per ottenere gli slot a seconda del giorno selezionato e della disponibilità dei dipendenti.
+     * @param dataSlot
+     * @return ResultSet con gli slots.
+     * @throws SQLException
+     */
     public ResultSet getAnteprimaSlot(LocalDate dataSlot) throws SQLException {
         this.connection = connectDB.getConnection();
         ResultSet rs = null;
@@ -1066,6 +1149,15 @@ String tipoPassaporto = result.getTipoPassaporto();
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per inserire il numero di appuntamenti nello slot orario selezionato.
+     * @param codiceSede
+     * @param data
+     * @param hslot
+     * @param serv
+     * @param numslot
+     * @throws SQLException
+     */
     public void inserisciAppuntamento(String codiceSede, String data, String hslot, String serv, int numslot) throws SQLException {
         this.connection = connectDB.getConnection();
         String query = "INSERT INTO public.appuntamento(\"codSede\", giorno, ora, servizio, \"numeroPosti\") VALUES (?, ?, ?, ?, ?);";
@@ -1083,6 +1175,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per DIPENDENTE per controllare se lo slot non sia già stato inserito.
+     * @param codiceSede
+     * @param data
+     * @param hslot
+     * @return true, if it's present. false, if it isn't.
+     * @throws SQLException
+     */
     public boolean checkPresenzaSlot(String codiceSede, String data, String hslot) throws SQLException {
         this.connection = connectDB.getConnection();
         String query = "SELECT \"codSede\", giorno, ora FROM public.appuntamento WHERE \"codSede\"=? AND giorno=? AND ora=?";
@@ -1104,6 +1204,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE per ottenere i dettagli della prenotazione svolta.
+     * @param serv
+     * @param id
+     * @return ResultSet con dettagli utente, dipendente e passaporto.
+     * @throws SQLException
+     */
     public ResultSet getDettagliPrenotazione(String serv, int id) throws SQLException {
         String rr;
         ResultSet rs = null;
@@ -1132,6 +1239,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per ottenere solo gli addetti della sede.
+     * @return ResultSet con dipendenti.
+     * @throws SQLException
+     */
     public ResultSet getDipendentiSede() throws SQLException {
         this.connection = connectDB.getConnection();
         ResultSet rs = null;
@@ -1148,16 +1260,25 @@ String tipoPassaporto = result.getTipoPassaporto();
         return rs;
     }
 
+    /**
+     * Metodo per DIPENDENTE per la generazione di una password random.
+     * @return String con password generata.
+     */
     public String generaPasswordDipendente() {
         return RandomPasswordGenerator.generateRandomString();
     }
 
+    /**
+     * Metodo per DIPENDENTE per la generazione di una marticola univoca.
+     * @return String con matricola
+     * @throws SQLException
+     */
     public String generaMatricolaDipendente() throws SQLException {
         StringBuilder sb = new StringBuilder("AD");
 
         Random random = new Random();
         for (int i = 0; i < 6; i++) {
-            int randomNumber = random.nextInt(10); // Generates a random number between 0 and 9
+            int randomNumber = random.nextInt(10);
             sb.append(randomNumber);
         }
 
@@ -1168,6 +1289,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return sb.toString();
     }
 
+    /**
+     * Metodo per DIPENDENTE di supporto al metodo precedente per controllare che la matricola sia univoca.
+     * @param matricolaGenerata
+     * @return true, if it's unique. false, if not.
+     * @throws SQLException
+     */
     private boolean checkPresenzaMatricola(String matricolaGenerata) throws SQLException {
 
         this.connection = connectDB.getConnection();
@@ -1187,6 +1314,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE per controllare l'integrità della mail inserita dal responsabile.
+     * @param fieldMailNuovoDipendente
+     * @return true, if it matches. false, if not.
+     * @throws SQLException
+     */
     public boolean checkMailDipendente(String fieldMailNuovoDipendente) throws SQLException {
         String pattern = "^[A-Za-z0-9_]+@questura\\.it$";
         boolean mailchecker = MailChecker(fieldMailNuovoDipendente);
@@ -1196,6 +1329,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
+    /**
+     * Metodo per DIPENDENTE di supporto al metodo precedente per controllare che la mail non sia già presente.
+     * @param fieldMailNuovoDipendente
+     * @return true, if it's present. false, if it's not.
+     * @throws SQLException
+     */
     private boolean MailChecker(String fieldMailNuovoDipendente) throws SQLException {
         this.connection = connectDB.getConnection();
 
@@ -1215,6 +1354,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE per il controllo della stringa relativa al numero di telefono inserito.
+     * @param input
+     * @return true, if it matches. false, if it doesn't.
+     * @throws SQLException
+     */
     public boolean checkNumeroTelefono(String input) throws SQLException {
         if (input.length() != 10) {
             return false;
@@ -1231,6 +1376,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE di supporto al metodo precedente per controllare che il numero di telefono non sia già presente.
+     * @param input
+     * @return true, if it's not present. false, if it is.
+     * @throws SQLException
+     */
     private boolean checkPresenzaNumero(String input) throws SQLException {
         this.connection = connectDB.getConnection();
         String query = "SELECT \"telUfficio\" FROM public.addetto WHERE \"telUfficio\"=?";
@@ -1249,12 +1400,29 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE per l'encryption della nuova password autogenerata.
+     * @param passwordGenerata
+     * @return String con password encrypted.
+     * @throws NoSuchAlgorithmException
+     */
     public String setEncryption(String passwordGenerata) throws NoSuchAlgorithmException {
         EncryptionPass encryptedPassword = new EncryptionPass();
         String passwordEncrypted = encryptedPassword.setEncrypt(passwordGenerata);
         return passwordEncrypted;
     }
 
+    /**
+     * Metodo per DIPENDENTE per l'inserimento del nuovo dipendente nel database.
+     * @param matricola
+     * @param nome
+     * @param cognome
+     * @param contratto
+     * @param telefono
+     * @param mail
+     * @param pwdGenerata
+     * @throws SQLException
+     */
     public void insertNuovoDipendente(String matricola, String nome, String cognome, String contratto, String telefono, String mail, String pwdGenerata) throws SQLException {
         this.connection = connectDB.getConnection();
 
@@ -1276,6 +1444,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per DIPENDENTE per controllare la presenza del turno di lavoro del dipendente.
+     * @param matricola
+     * @param orario
+     * @param giorno
+     * @return true, if it's present. false, if it's not.
+     * @throws SQLException
+     */
     public boolean checkPresenzaTurno(String matricola, String orario, String giorno) throws SQLException {
 
         ArrayList<LocalTime> orari = getOrari(orario);
@@ -1285,6 +1461,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return checker;
     }
 
+    /**
+     * Metodo per MODEL per la gestione della formattazione degli slot orario tra i controller, user input e database.
+     * @param orario
+     * @return ArrayList<LocalTime> orari convertiti
+     */
     private ArrayList<LocalTime> getOrari(String orario) {
         LocalTime orarioInizio = null;
         LocalTime orarioFine = null;
@@ -1305,6 +1486,15 @@ String tipoPassaporto = result.getTipoPassaporto();
         return orari;
     }
 
+    /**
+     * Metodo per DIPENDENTE di supporto a checkPresenzaTurno per il controllo di consistenza del turno.
+     * @param matricola
+     * @param orarioInizio
+     * @param orarioFine
+     * @param giorno
+     * @return true, if it's present. false, if it's not.
+     * @throws SQLException
+     */
     private boolean checkTurno(String matricola, LocalTime orarioInizio, LocalTime orarioFine, String giorno) throws SQLException {
         ResultSet rs = null;
         this.connection = connectDB.getConnection();
@@ -1327,6 +1517,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         return true;
     }
 
+    /**
+     * Metodo per DIPENDENTE per l'inserimento del turno di lavoro.
+     * @param matricola
+     * @param orario
+     * @param giorno
+     * @throws SQLException
+     */
     public void insertTurnoDipendente(String matricola, String orario, String giorno) throws SQLException {
         String query = "INSERT INTO public.\"turnoLavoro\"(\"matricolaAddetto\", giorno, \"orarioInizio\", \"orarioFine\") VALUES (?, ?, ?, ?)";
         ArrayList<LocalTime> orari = getOrari(orario);
@@ -1345,6 +1542,13 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per DIPENDENTE per eliminare un turno di lavoro già presente.
+     * @param matricola
+     * @param orario
+     * @param giorno
+     * @throws SQLException
+     */
     public void deleteTurnoDipendente(String matricola, String orario, String giorno) throws SQLException {
         ArrayList<LocalTime> orari = getOrari(orario);
         this.connection = connectDB.getConnection();
@@ -1363,6 +1567,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per CITTADINO per ottenere gli slots degli orari giorno per giorno.
+     * @param dateFocus
+     * @param codice
+     * @param text
+     * @return ResultSet con orari.
+     * @throws SQLException
+     */
     public ResultSet getSlots(LocalDate dateFocus, String codice, String text) throws SQLException {
         String query = "SELECT ora, \"numeroPosti\" FROM public.appuntamento\n" +
                 "WHERE giorno = ?\n" +
@@ -1384,7 +1596,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return rs;
     }
 
-
+    /**
+     * Metodo per CITTADINO per contare quanti slots sono presenti in un giorno.
+     * @param dateC
+     * @return int con numero slots.
+     * @throws SQLException
+     */
     public int countSlots(LocalDate dateC) throws SQLException {
         String query = "SELECT COUNT(giorno) from public.appuntamento WHERE giorno = ?";
         ResultSet rs = null;
@@ -1405,11 +1622,20 @@ String tipoPassaporto = result.getTipoPassaporto();
         return count;
     }
 
+    /**
+     * Metodo per MODEL per settare il codice fiscale del cittadino, nel caso l'oggetto Cittadino non lo possieda.
+     * @param cfCittadino
+     */
     public void setCFCittadino(String cfCittadino) {
         CFCittadino = cfCittadino;
         cittadinoModel.setCodiceFiscale(cfCittadino);
     }
 
+    /**
+     * Metodo per DIPENDENTE per visualizzare tutti i passaporti con stato in processo e che possono essere ritirati.
+     * @param cfCittadino
+     * @throws SQLException
+     */
     public void getPassaportoRitiro(String cfCittadino) throws SQLException {
         this.connection = connectDB.getConnection();
 
@@ -1436,21 +1662,30 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
         connection.close();
     }
+    // -- richiamo di metodi che esistono già nella classe passaporto.
     public String getPassaportoModelNumero(){
         return passaportoModel.getNumero();
     }
     public String getPassaportoModelTipo(){
         return passaportoModel.getTipo();
     }
-
     public String getPassaportoModelCF(){
         return passaportoModel.getCfCittadino();
     }
-
     public LocalDate getPassaportoModelDate(){
         return passaportoModel.getDataScadenza();
     }
+    public String getSedeAddetto() {
+        return addettoModel.getCodiceSede();
+    }
+    // -- fine di questi metodi, sono stati inseriti per la correttezza del codice ma non utilizzati
 
+    /**
+     * Metodo per DIPENDENTE per disattivare un passaporto
+     * @param text
+     * @return # of deactivated passports
+     * @throws SQLException
+     */
     public int disattivaPP(String text) throws SQLException {
         this.connection = connectDB.getConnection();
         String query = "UPDATE public.passaporto\n" +
@@ -1463,6 +1698,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return affectedRows;
     }
 
+    /**
+     * Metodo per CITTADINO per controllare i servizi presente in una sede
+     * @param value
+     * @return ArrayList<String> servizi
+     * @throws SQLException
+     */
     public ArrayList<String> getSedeServizi(String value) throws SQLException {
         String servizio = value.equals("Ritiro") ? "Ritiro" : "Rilascio";
         ArrayList<String> sedi = new ArrayList<>();
@@ -1489,6 +1730,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return sedi;
     }
 
+    /**
+     * Metodo condiviso da CITTADINO e DIPENDENTE per il controllo del codice della sede e della città.
+     * @param value
+     * @return String to compare.
+     * @throws SQLException
+     */
     public String getNSede(String value) throws SQLException {
         this.connection = connectDB.getConnection();
         String codSede = new String();
@@ -1510,6 +1757,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         return codSede;
     }
 
+    /**
+     * Metodo per CITTADINO per visualizzare quali slots non sono più disponibili.
+     * @param dateC
+     * @param numSedePP
+     * @param servPP
+     * @return # number of empty slots per day.
+     * @throws SQLException
+     */
     public int getZeroSlot(LocalDate dateC, String numSedePP, String servPP) throws SQLException {
 
         String query = "SELECT COUNT(\"numeroPosti\")\n" +
@@ -1540,6 +1795,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return count;
     }
 
+    /**
+     * Metodo per CITTADINO per visualizzare la causale di rilascio.
+     * @param string
+     * @return String.
+     */
     public String getCausaRilascio(String string){
         String pattern = "Rilascio per ";
 
@@ -1555,6 +1815,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         return substring;
     }
 
+    /**
+     * Metodo per CITTADINO per l'inizializzazione della coda.
+     * @param servPP
+     * @param numSedePP
+     * @param value
+     * @param timeStamp
+     * @throws SQLException
+     */
     public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) throws SQLException {
         this.connection = connectDB.getConnection();
         String query = "INSERT INTO public.prenotazione(" +
@@ -1578,6 +1846,14 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per CITTADINO per ottenere il numero della coda.
+     * @param servPP
+     * @param numSedePP
+     * @param timeStampEntrata
+     * @return # of queue
+     * @throws SQLException
+     */
     public int getCoda(String servPP, String numSedePP, Timestamp timeStampEntrata) throws SQLException {
         int numeroCoda = 0;
         ResultSet rs;
@@ -1605,6 +1881,15 @@ String tipoPassaporto = result.getTipoPassaporto();
         return numeroCoda;
     }
 
+    /**
+     * Metodo per CITTADINO per l'inserimento della prenotazione.
+     * @param numSedePP
+     * @param giornoPrenotazione
+     * @param slotPrenotazione
+     * @param timeStampEntrata
+     * @param servizioEntrata
+     * @throws SQLException
+     */
     public void setPrenotazione(String numSedePP, LocalDate giornoPrenotazione, String slotPrenotazione, Timestamp timeStampEntrata, String servizioEntrata) throws SQLException {
 
         this.connection = connectDB.getConnection();
@@ -1637,6 +1922,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per MODEL per conversione degli slots in LocalTime.
+     * @param slotPrenotazione
+     * @return LocalTime
+     */
     private LocalTime getOrarioSlot(String slotPrenotazione) {
         LocalTime ora = null;
 
@@ -1662,6 +1952,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return ora;
     }
 
+    /**
+     * Metodo per CITTADINO per il controllo della prenotazione del passaporto nel database per il primo rilascio.
+     * @return true, if it's present. false, if not.
+     * @throws SQLException
+     */
     public boolean getPresenzaPassaporto() throws SQLException {
 
         String query = "SELECT COUNT(*)\n" +
@@ -1688,34 +1983,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
-    /*
-    public boolean getScadenzaPassaporto() throws SQLException {
-        String query = "SELECT \"dataScadenza\" - CURRENT_DATE\n" +
-                "FROM public.passaporto \n" +
-                "WHERE \"CFcittadino\" = ?\n" +
-                "AND stato = 'ATTIVO'";
-
-        ResultSet rs = null;
-        this.connection = connectDB.getConnection();
-
-        try{
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, cittadinoModel.getCodiceFiscale());
-            rs = statement.executeQuery();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        while(rs.next()){
-            if(rs.getInt(1)<0){
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * Metodo per CITTADINO per il controllo della prenotazione del passaporto per Furto, deteRioramento e/o Smarrimento.
+     * @return true, if it's present. false, if not.
+     * @throws SQLException
      */
-
     public boolean getPassaportoFRS() throws SQLException {
 
         String query = "SELECT COUNT(*)\n" +
@@ -1744,7 +2016,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
-    // NON deve restituire data, da rifare
+    /**
+     * Metodo per CITTADINO per il controllo della prenotazione del passaporto per la presenza di un passaporto in processo
+     * per poter effettuare il ritiro.
+     * @return LocalDate of last appointment.
+     * @throws SQLException
+     */
     public LocalDate getIfPassaportoRitiro() throws SQLException {
         LocalDate dataRitiro = null;
 
@@ -1772,6 +2049,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return dataRitiro;
     }
 
+    /**
+     * Metodo per CITTADINO per eliminare la prenotazione dal database.
+     * @param timeStampEntrata
+     * @throws SQLException
+     */
     public void deletePrenotazione(Timestamp timeStampEntrata) throws SQLException {
         String query = "DELETE FROM public.prenotazione\n" +
                 "\tWHERE \"dataOraPrenotazione\" = ?\n" +
@@ -1791,6 +2073,12 @@ String tipoPassaporto = result.getTipoPassaporto();
         connection.close();
     }
 
+    /**
+     * Metodo per CITTADINO per controllare la presenza di un passaporto in processo e che può essere ritirato.
+     * @param giornoPrenotazione
+     * @return true, if it's present. false, if not.
+     * @throws SQLException
+     */
     public boolean checkRitiro(LocalDate giornoPrenotazione) throws SQLException {
 
         ResultSet rs = null;
@@ -1821,6 +2109,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
+    /**
+     * Metodo per CITTADINO per controllare se il passaporto è in scadenza.
+     * @return true, if it is. false, if not.
+     * @throws SQLException
+     */
     public boolean checkScadenzaPP() throws SQLException {
         ResultSet rs = null;
 
@@ -1848,6 +2141,11 @@ String tipoPassaporto = result.getTipoPassaporto();
         return false;
     }
 
+    /**
+     * Metodo per CITTADINO che controlla se l'utente ha già una prenotazione in corso.
+     * @return true if it's present. false, if not.
+     * @throws SQLException
+     */
     public boolean getPrenotazioneUnica() throws SQLException {
         ResultSet rs = null;
 
@@ -1872,9 +2170,5 @@ String tipoPassaporto = result.getTipoPassaporto();
         }
         connection.close();
         return false;
-    }
-
-    public String getSedeAddetto() {
-        return addettoModel.getCodiceSede();
     }
 }

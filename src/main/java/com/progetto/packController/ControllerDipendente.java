@@ -177,7 +177,6 @@ public class ControllerDipendente implements Initializable {
     private Button terminaPPR = new Button();
     @FXML
     private Label tipoPPR = new Label();
-    // --- fxml view slot ---
     @FXML
     private Button aggiungiSlot = new Button();
     @FXML
@@ -196,7 +195,7 @@ public class ControllerDipendente implements Initializable {
     private VBox vboxSlot = new VBox();
 
     @FXML
-    private TitledPane anteprimaSlot = new TitledPane();
+    TitledPane anteprimaSlot = new TitledPane();
     @FXML
     private Button caricaDipSlot = new Button();
     @FXML
@@ -220,7 +219,6 @@ public class ControllerDipendente implements Initializable {
 
     @FXML
     private Button buttonNuovoDipendente = new Button();
-    //----- da inizializzare nascoste
     @FXML
     private ChoiceBox<String> choiceBoxContrattoNuovoDipendente = new ChoiceBox<>();
     @FXML
@@ -246,7 +244,6 @@ public class ControllerDipendente implements Initializable {
     @FXML
     private Label mailNuovoDipendente = new Label();
 
-
     private static String gg = new String();
     private static boolean sceltaDipSlot = false;
     private static LocalDate dataSlot;
@@ -256,11 +253,16 @@ public class ControllerDipendente implements Initializable {
     private static int ndip;
     private boolean isYesPressed = false;
     private boolean isNoPressed = false;
-
     @FXML
     private ScrollPane scrollPaneGestioneDipendenti = new ScrollPane();
 
-
+    /**
+     * Metodo utilizzato per il login con il controllo di integrità di password e username.
+     * @param eventAccediDipendente
+     * @throws SQLException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
     @FXML
     void accediDipendente(ActionEvent eventAccediDipendente) throws SQLException, IOException, NoSuchAlgorithmException {
         boolean loginChecker = this.model.checkLogin(matricolaDipendente.getText(), passwordDipendente.getText(), "addetto");
@@ -616,7 +618,7 @@ public class ControllerDipendente implements Initializable {
 
     // TODO
     //      bloccare se vuole inserire di nuovo gli stessi slot
-    private void apriAnteprimaSlot() throws SQLException {
+    void apriAnteprimaSlot() throws SQLException {
         anteprimaSlot.setMouseTransparent(false);
         anteprimaSlot.setOpacity(1.0);
         anteprimaSlot.setExpanded(true);
@@ -690,7 +692,7 @@ public class ControllerDipendente implements Initializable {
     }
 
     @FXML
-    private void confermaSlotData(ActionEvent event) throws SQLException {
+    void confermaSlotData(ActionEvent event) throws SQLException {
         ResultSet rs = null;
         dataSlot = datePickerSlot.getValue();
         LocalDate date = datePickerSlot.getValue();
@@ -1670,7 +1672,7 @@ public class ControllerDipendente implements Initializable {
 
         if (this.model.getCategoriaCittadino().equals("Cittadino minorenne")) {
             labelDettCittadino.setText(this.model.getNomeCittadino() + " " + this.model.getCognomeCittadino() + " " + this.model.getCFCittadino() + ". Nato a " + this.model.getLuogoNCittadino() + ", " + this.model.getStatoNCittadino() + " il " + this.model.getDataNCittadino() + "\n\tmail: " + this.model.getMailCittadino() +
-                    ", codice tessera sanitaria: " + this.model.getTessSanitariaCittadino() + " e con tutori:" + this.model.getTutore1Cittadino() + " " + this.model.getTutore2Cittadino());
+                    ", codice tessera sanitaria: " + this.model.getTessSanitariaCittadino() + " e con i suoi tutori, genitori e/o chi ne esercita la patria potestà.");
         } else {
             labelDettCittadino.setText(this.model.getNomeCittadino() + " " + this.model.getCognomeCittadino() + " " + this.model.getCFCittadino() + ". Nato a " + this.model.getLuogoNCittadino() + ", " + this.model.getStatoNCittadino() + " il " + this.model.getDataNCittadino() + "\n\tmail: " + this.model.getMailCittadino() +
                     ", codice tessera sanitaria: " + this.model.getTessSanitariaCittadino());
