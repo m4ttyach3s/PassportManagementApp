@@ -164,6 +164,13 @@ public class ControllerCittadino implements Initializable {
         primaryStage = stage;
     }
 
+    /**
+     * Gestisce l'apertura della vista per l'accesso del cittadino a seconda del risultato ottenuto dal model.
+     * @param eventAccediCittadino
+     * @throws SQLException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
     @FXML
     void accediCittadino(ActionEvent eventAccediCittadino) throws SQLException, IOException, NoSuchAlgorithmException {
         boolean loginChecker = this.model.checkLogin(codiceFiscale.getText(), passwordCittadino.getText(), "cittadino");
@@ -179,6 +186,11 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Gestisce l'apertura della vista per l'accesso al portale del cittadino.
+     * @param eventAccediCittadino
+     * @throws IOException
+     */
     private void openPortaleCittadino(ActionEvent eventAccediCittadino) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
         Stage stage = (Stage) ((Node) eventAccediCittadino.getSource()).getScene().getWindow();
@@ -188,6 +200,11 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce l'apertura della vista per tornare al portale del cittadino.
+     * @param eventAccediCittadino
+     * @throws IOException
+     */
     @FXML
     private void tornaPortaleCittadino(ActionEvent eventAccediCittadino) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
@@ -198,6 +215,11 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce l'apertura della vista per il logout.
+     * @param eventIndietro
+     * @throws IOException
+     */
     @FXML
     void indietro(ActionEvent eventIndietro) throws IOException{
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/first-view.fxml"));
@@ -208,6 +230,11 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce l'apertura del portale cittadino con un actionevent specifico per ri-ottenere il primary stage.
+     * @param eventIndietroCitt
+     * @throws IOException
+     */
     @FXML
     void indietroPortaleCittadino(ActionEvent eventIndietroCitt)throws IOException{
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/portale-cittadino-view.fxml"));
@@ -219,6 +246,11 @@ public class ControllerCittadino implements Initializable {
 
     }
 
+    /**
+     * Gestisce l'apertura della vista per la modifica dei dati del cittadino.
+     * @param eventDati
+     * @throws IOException
+     */
     @FXML
     void modificaDati(ActionEvent eventDati) throws IOException{
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewCittadino/modifica-dati-cittadino-view.fxml"));
@@ -229,6 +261,13 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce l'apertura della selezione del servizio e della sede, a seconda della risposta del model. Gestisce output
+     * negativi tramite popup.
+     * @param nP
+     * @throws IOException
+     * @throws SQLException
+     */
     @FXML
     void openPortalePrenotazioni(ActionEvent nP) throws IOException, SQLException {
 
@@ -246,7 +285,11 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
-
+    /**
+     * Gestisce l'apertura della vista del Calendario per le prenotazioni.
+     * @param e
+     * @throws IOException
+     */
     private void openCalendar(ActionEvent e) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/Calendar.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
@@ -260,6 +303,9 @@ public class ControllerCittadino implements Initializable {
         stage.show();
     }
 
+    /**
+     * Alert per errori sulla prenotazione
+     */
     private void startAlertAnnullamento() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -268,6 +314,9 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Alert per segnalae il successo dell'annullamente della prenotazione.
+     */
     private void startSuccessAnnullamento() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Confermato!");
@@ -276,6 +325,9 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Alert per segnalare il download del pdf generato.
+     */
     private void startPDFSuccess() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Confermato!");
@@ -284,7 +336,10 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
-
+    /**
+     * Alert per segnalare la modifica dei dati.
+     * @param text
+     */
     private void startSuccess(String text) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Confermato!");
@@ -299,6 +354,11 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Metodo che gestisce la presenza dei pop-up tramite una stringa di input. A seconda del valore della stringa,
+     * verranno mostrati all'utente diversi pop up di errore.
+     * @param string
+     */
     private void startAlert(String string) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -325,6 +385,11 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Metodo che gestisce graficamente la presenza delle prenotazioni attive con l'aggiunta di pulsanti per scaricare pdf e annullare la prenotazione
+     * Gli elementi grafici dipendono dalla risposta del model.
+     * @throws SQLException
+     */
     @FXML
     void prenotazioniAttive() throws SQLException {
         VBox vboxpattive = new VBox();
@@ -397,7 +462,11 @@ public class ControllerCittadino implements Initializable {
         ScrollPaneAttive.setContent(vboxpattive);
     }
 
-
+    /**
+     * Metodo che gestisce graficamente la presenza delle prenotazioni passate con l'aggiunta di pulsante per scaricare pdf.
+     * Gli elementi grafici dipendono dalla risposta del model.
+     * @throws SQLException
+     */
     @FXML
     void prenotazioniPassate() throws SQLException {
         VBox vboxpassate = new VBox();
@@ -443,12 +512,17 @@ public class ControllerCittadino implements Initializable {
         ScrollPanePassate.setContent(vboxpassate);
     }
 
-
+    /**
+     * Metodo che gestisce graficamente se l'utente ha richiesto di modificare la password
+     */
     private void checkEditPwdButton() {
         isEditPWD = !isEditPWD;
         if(isEditPWD){editPassword();}else{hidePwd();}
     }
 
+    /**
+     * Metodo che nasconde graficamente il campo di modifica della password
+     */
     private void hidePwd() {
         labelNuovaPassword.setMouseTransparent(true);
         nuovaPassword.setMouseTransparent(true);
@@ -464,11 +538,17 @@ public class ControllerCittadino implements Initializable {
         hiddenTF.setText("");
     }
 
+    /**
+     * Metodo che gestisce graficamente se l'utente ha richiesto di modificare la mail
+     */
     private void checkEditMailButton() {
         isEditMAIL = !isEditMAIL;
         if(isEditMAIL){editMail();}else{hideMail();}
     }
 
+    /**
+     * Metodo che nasconde graficamente il campo di modifica della mail
+     */
     private void hideMail() {
         labelNuovaMail.setVisible(false);
         nuovaMail.setVisible(false);
@@ -479,6 +559,9 @@ public class ControllerCittadino implements Initializable {
         nuovaMail.setText("");
     }
 
+    /**
+     * Metodo che mostra graficamente il campo di modifica della mail
+     */
     private void editMail() {
         labelNuovaMail.setMouseTransparent(false);
         nuovaMail.setMouseTransparent(false);
@@ -488,6 +571,9 @@ public class ControllerCittadino implements Initializable {
         confermaModificaMail.setMouseTransparent(false);
     }
 
+    /**
+     * Metodo che mostra graficamente il campo di modifica della password
+     */
     private void editPassword() {
         labelNuovaPassword.setMouseTransparent(false);
         nuovaPassword.setMouseTransparent(false);
@@ -499,6 +585,12 @@ public class ControllerCittadino implements Initializable {
         confermaModificaPassword.setMouseTransparent(false);
     }
 
+    /**
+     * Metodo che mostra graficamente il risultato della modifica della password, a seconda della risposta ottenuta dal model.
+     * @param event
+     * @throws NoSuchAlgorithmException
+     * @throws SQLException
+     */
     @FXML
     void updatePasswordCittadino(ActionEvent event) throws NoSuchAlgorithmException, SQLException {
         EncryptionPass encryptedPassword = new EncryptionPass();
@@ -511,6 +603,11 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Metodo che mostra graficamente il risultato della modifica della mail, a seconda della risposta ottenuta dal model.
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void UpdateMailCittadino(ActionEvent event) throws SQLException {
 
@@ -522,6 +619,9 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Metodo che gestisce se l'utente ha richiesto di vedere la password che sta digitando
+     */
     private void checkHiddenPwd() {
         isPWDHidden = !isPWDHidden;
         if(isPWDHidden){
@@ -531,6 +631,9 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Metodo che gestisce se l'utente ha richiesto di nascondere la password che sta digitando
+     */
     private void hideHiddenPWD() {
         hiddenTF.setVisible(false);
         hiddenTF.toBack();
@@ -540,6 +643,9 @@ public class ControllerCittadino implements Initializable {
         nuovaPassword.setVisible(true);
     }
 
+    /**
+     * Metodo che mostra graficamente all'utente la password che sta digitando
+     */
     private void showHiddenPWD() {
         hiddenTF.toFront();
         hiddenTF.setVisible(true);
@@ -549,6 +655,11 @@ public class ControllerCittadino implements Initializable {
         hiddenTF.setText(nuovaPassword.getText());
     }
 
+    /**
+     * Metodo per tornare un mese indietro nel calendario
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void backOneMonth(ActionEvent event) throws SQLException {
         dateFocus = dateFocus.minusMonths(1); // Muovi la focus date indietro di un mese
@@ -557,6 +668,11 @@ public class ControllerCittadino implements Initializable {
         updateButtonStatus(backOne); // aggiorna il pulsante
     }
 
+    /**
+     * Metodo per andare un mese avanti nel calendario
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void forwardOneMonth(ActionEvent event) throws SQLException {
         dateFocus = dateFocus.plusMonths(1); // Muovi la focus date avanti di un mese
@@ -565,15 +681,28 @@ public class ControllerCittadino implements Initializable {
         updateButtonStatus(backOne); // aggiorna il pulsante
     }
 
+    /**
+     * Metodo che disabilita il pulsante per tornare indietro di un mese dal mese corrente.
+     * @param button
+     */
     private void updateButtonStatus(Button button) {
         button.setDisable(!canGoBack());
     }
 
+    /**
+     * Metodo che comunica se l'utente può tornare indietro.
+     * @return
+     */
     private boolean canGoBack() {
         ZonedDateTime initialDate = ZonedDateTime.now(); // data iniziale
         return !dateFocus.isBefore(initialDate);
     }
 
+    /**
+     * Metodo che gestisce dinamicamente l'apertura del calendario a seconda della risposta ottenuta dal model.
+     * @param e
+     * @throws SQLException
+     */
     @FXML
     private void openCalendarApp(ActionEvent e) throws SQLException {
         HAS_ENTERED = true;
@@ -628,15 +757,24 @@ public class ControllerCittadino implements Initializable {
                 });
 
                 executeCalendarLogic();
-                //Platform.runLater(this::executeCalendarLogic);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
     }
 
+    /**
+     * Metodo che disegna dinamicamente il calendario. Considera l'anno bisestile, considera la distribuzione dei giorni
+     * in uno schema da che va da domenica a sabato. Controlla con il model se nei giorni sono presenti slot, controlla
+     * l'orario degli slot, il numero degli appuntamenti e lo mostra graficamente con un linguaggio color coded.
+     * Grigio = giorno non permesso e/o precedente al giorno attuale.
+     * Rosso = slot con numero di appuntamenti terminati
+     * Verde = slot disponibile
+     * Giallo = giorno con slot non ancora assegnati.
+     * @throws SQLException
+     */
     private void drawCalendar() throws SQLException {
-        year.setText(String.valueOf(dateFocus.getYear())); // Set the year text
+        year.setText(String.valueOf(dateFocus.getYear())); // anno
         month.setText(dateFocus.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN).toUpperCase());
 
         // Dimensions and styling for the calendar elements
@@ -795,6 +933,9 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Fa partire il timer del calendario.
+     */
     private void startTimer() {
         remainingTime = START_TIME;
 
@@ -819,12 +960,21 @@ public class ControllerCittadino implements Initializable {
         timeline.play();
     }
 
+    /**
+     * Aggiorna graficamente il timer del calendario
+     * @return
+     */
     private String updateTimerLabel() {
         int minutes = remainingTime / 60;
         int seconds = remainingTime % 60;
         return String.format("%02d:%02d", minutes, seconds);
     }
 
+    /**
+     * Chiude il calendario e mostra graficamente tale azione all'utente allo scadere del tempo prestabilito.
+     * @throws IOException
+     * @throws SQLException
+     */
     private void stopTimer() throws IOException, SQLException {
         timeline.stop();
         isTimerOver = true;
@@ -860,6 +1010,10 @@ public class ControllerCittadino implements Initializable {
         return rs;
     }
 
+    /**
+     * Metodo per far partire il timer della cosa.
+     * @param numeroCoda
+     */
     private void startTimerCoda(int numeroCoda) {
         remainingTime = START_TIME_CODA;
         startControlloCoda(numeroCoda);
@@ -877,6 +1031,10 @@ public class ControllerCittadino implements Initializable {
         timeline.play();
     }
 
+    /**
+     * Metodo che termina il timer della coda.
+     * @throws IOException
+     */
     private void stopTimerCoda() throws IOException {
         if(hasCodaStarted){
             buttonAggiornaCoda.fire();
@@ -887,6 +1045,13 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Gestisce graficamente la confermare della prenotazione, controllando tramite il model a quali servizi l'utente può
+     * avere accesso.
+     * @param event
+     * @throws SQLException
+     * @throws IOException
+     */
     @FXML
     void setConfermaPrenotazione(ActionEvent event) throws SQLException, IOException {
             boolean hasRitiro = this.model.checkRitiro(giornoPrenotazione);
@@ -919,10 +1084,18 @@ public class ControllerCittadino implements Initializable {
             }
     }
 
+    /**
+     * Metodo di supporto per controllare che l'input scelto dall'utente sia coerente.
+     * @return
+     */
     private boolean isValidInput() {
         return slotPrenotazione != null && !slotPrenotazione.isEmpty() && giornoPrenotazione != null;
     }
 
+    /**
+     * Alert per indicare la conferma della prenotazione.
+     * @param value
+     */
     private void startAzioneSuccess(String value) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Confermato!");
@@ -935,6 +1108,12 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Metodo initialize che deve essere presente per ogni classe che implementa Initializable.
+     * Inizializza diversi elementi grafici e gestisce l'interazione dell'utente con alcuni di questi elementi.
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         nomeUser.setText(this.model.getNome());
@@ -986,6 +1165,10 @@ public class ControllerCittadino implements Initializable {
         });
     }
 
+    /**
+     * Metodo che gestisce graficamente la coda.
+     * @param numeroCoda
+     */
     private void startControlloCoda(int numeroCoda) {
         hasCodaStarted = true;
         confermaPrenotazioneServizioSede.setVisible(false);
@@ -998,6 +1181,9 @@ public class ControllerCittadino implements Initializable {
         buttonAggiornaCoda.setVisible(true);
     }
 
+    /**
+     * Alert per segnalare l'assenza di un servizio.
+     */
     private void startAlertServizio() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1006,6 +1192,9 @@ public class ControllerCittadino implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Metodo che gestisce graficamente la presenza del calendario
+     */
     private void executeCalendarLogic() {
         if (calendarLogicExecuted || isTimerOver || indietroButtonPrenotazione.isPressed()) {
             return;
@@ -1020,6 +1209,11 @@ public class ControllerCittadino implements Initializable {
         }
     }
 
+    /**
+     * Metodo che gestisce graficamente la presenza delle città a seconda del servizio che l'utente può richiedere.
+     * @param e
+     * @throws SQLException
+     */
     @FXML
     void getCheckCittaServizio(ActionEvent e) throws SQLException {
         ArrayList<String> cittaServizio = new ArrayList<>();
@@ -1090,7 +1284,13 @@ public class ControllerCittadino implements Initializable {
 
     }
 
-
+    /**
+     * Metodo che gestisce l'apertura del portale del cittadino con actionevent diverso e che dipende da una operazione
+     * di cambiamento dei dati del database da parte del model.
+     * @param e
+     * @throws IOException
+     * @throws SQLException
+     */
     @FXML
     private void indietroPrenotazioneUtente(ActionEvent e) throws IOException, SQLException {
         this.model.deletePrenotazione(TIME_STAMP_ENTRATA);
