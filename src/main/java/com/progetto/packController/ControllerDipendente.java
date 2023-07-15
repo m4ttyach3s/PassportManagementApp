@@ -162,7 +162,6 @@ public class ControllerDipendente implements Initializable {
     @FXML
     private Button confermaInserimentoPP = new Button();
     private static String numero_pp = new String();
-
     @FXML
     private Label CFPPR = new Label();
     @FXML
@@ -243,7 +242,6 @@ public class ControllerDipendente implements Initializable {
     private Label labelTipoContrattoNuovoDipendente = new Label();
     @FXML
     private Label mailNuovoDipendente = new Label();
-
     private static String gg = new String();
     private static boolean sceltaDipSlot = false;
     private static LocalDate dataSlot;
@@ -257,7 +255,7 @@ public class ControllerDipendente implements Initializable {
     private ScrollPane scrollPaneGestioneDipendenti = new ScrollPane();
 
     /**
-     * Metodo utilizzato per il login con il controllo di integrità di password e username.
+     * Metodo che richiama il model e a seconda della risposta ottenuta apre il portale del dipendente oppure mostra un messaggio.
      * @param eventAccediDipendente
      * @throws SQLException
      * @throws IOException
@@ -283,6 +281,9 @@ public class ControllerDipendente implements Initializable {
         }
     }
 
+    /**
+     * Metodo per inizializzare parti della scena del portale dipendente.
+     */
     private void initDipScene() {
         lineaSx.setVisible(false);
         lineaDx.setVisible(false);
@@ -290,6 +291,11 @@ public class ControllerDipendente implements Initializable {
         gestioneDipendenti.setVisible(false);
     }
 
+    /**
+     * Metodo condiviso da due metodi per effettuare il logout
+     * @param eventIndietro
+     * @throws IOException
+     */
     @FXML
     void indietro(ActionEvent eventIndietro) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/first-view.fxml"));
@@ -300,6 +306,12 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
+    /**
+     * Metodo initialize caratteristico di ogni classe che implementa Initializable.
+     * Al suo interno si può trovare anche la logica di alcune operazioni svolte su pulsanti e la modifica di alcuni dati.
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -593,20 +605,20 @@ public class ControllerDipendente implements Initializable {
         choiceBoxContrattoNuovoDipendente.setItems(contratti);
     }
 
+    /**
+     * Metodo che chiama il model per ottenere i passaporti da ritirare
+     * @param cfCittadino
+     * @throws SQLException
+     */
     private void setPassaportoRitiro(String cfCittadino) throws SQLException {
         this.model.getPassaportoRitiro(cfCittadino);
     }
 
-    /*
-    private void setLabelsRitiro() {
-        numPPR.setText(passaportoDip.getNumero());
-        CFPPR.setText(passaportoDip.getCfCittadino());
-        tipoPPR.setText(passaportoDip.getTipo());
-        scadenzaPPR.setText(String.valueOf(passaportoDip.getDataScadenza()));
-
-        System.out.println("numero "+numPPR.getText());
-    }*/
-
+    /**
+     * Metodo per aprire la vista della gestione dei dipendenti.
+     * @param event
+     * @throws IOException
+     */
     private void apriGestioneDipendenti(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestione-dipendenti-view.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -616,8 +628,10 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
-    // TODO
-    //      bloccare se vuole inserire di nuovo gli stessi slot
+    /**
+     * Metodo per aprire e gestire la vista degli slots.
+     * @throws SQLException
+     */
     void apriAnteprimaSlot() throws SQLException {
         anteprimaSlot.setMouseTransparent(false);
         anteprimaSlot.setOpacity(1.0);
@@ -683,6 +697,9 @@ public class ControllerDipendente implements Initializable {
         scrollpaneAccSlot.setContent(vboxAccSlot);
     }
 
+    /**
+     * Alert per la presenza dello slot.
+     */
     private void startPresenzaSlotAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -691,6 +708,12 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Metodo che gestisce la grafica dell'inserimento dello slot e comunica tali informazioni al model.
+     * Gestisce graficamente la risposta del model.
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void confermaSlotData(ActionEvent event) throws SQLException {
         ResultSet rs = null;
@@ -726,6 +749,11 @@ public class ControllerDipendente implements Initializable {
         }
     }
 
+    /**
+     * Metodo che mostra i dati dei dipendenti. Gestisce graficamente la risposta del model.
+     * @param rs
+     * @throws SQLException
+     */
     private void showDataDipendenti(ResultSet rs) throws SQLException {
         VBox VboxSlot = new VBox();
         VboxSlot.setSpacing(10);
@@ -866,6 +894,9 @@ public class ControllerDipendente implements Initializable {
         scrollpaneSlot.setContent(VboxSlot);
     }
 
+    /**
+     * Alert presenza
+     */
     private void startPresenzaAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -874,6 +905,9 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Alert generico di errore.
+     */
     public void startConfermaAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -882,16 +916,29 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Metodo per la gestione dei colori sui pulsanti
+     * @return boolean
+     */
     private boolean checkNoPressed() {
         isNoPressed = !isNoPressed;
         return isNoPressed;
     }
 
+    /**
+     * Metodo per la gestione dei colori sui pulsanti
+     * @return boolean
+     */
     private boolean checkYesPressed() {
         isYesPressed = !isYesPressed;
         return isYesPressed;
     }
 
+    /**
+     * Gestisce la vista portale-dipendente
+     * @param e
+     * @throws IOException
+     */
     private void openPortaleView(ActionEvent e) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/portale-dipendente-view.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
@@ -901,6 +948,11 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce la vista degli slots.
+     * @param e
+     * @throws IOException
+     */
     private void openSlotView(ActionEvent e) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/slot-view.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
@@ -910,6 +962,12 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce la vista del ritiro del passaporto.
+     * @param e
+     * @throws IOException
+     * @throws SQLException
+     */
     private void updateRitiroPassaporto(ActionEvent e) throws IOException, SQLException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/ritiro-passaporto-view.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
@@ -919,6 +977,9 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
+    /**
+     * Alert di errore per il passaporto
+     */
     private void startFailureAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -927,6 +988,11 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Gestisce graficamente l'inserimento di un nuovo passaporto.
+     * @param e
+     * @throws SQLException
+     */
     private void insertNuovoPP(ActionEvent e) throws SQLException {
         this.model.insertNuovoPassaporto(numeroPassaporto.getText(), labelInserimentoCF.getText(), choiceBox.getValue(), dataScadenzaPP.getText(), Integer.parseInt(c.get(1)));
         startSuccessAlert("Rilascio");
@@ -934,6 +1000,10 @@ public class ControllerDipendente implements Initializable {
         aggiornaDB();
     }
 
+    /**
+     * Metodo che implementa l'alert per il successo di una operazione in un unico metodo, gestendo l'output da una stringa.
+     * @param tipo
+     */
     private void startSuccessAlert(String tipo) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Confermato!");
@@ -954,6 +1024,11 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Gestisce la vista per l'inserimento del passaporto
+     * @param e
+     * @throws IOException
+     */
     private void updateRilascioPassaporto(ActionEvent e) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/inserimento-passaporto-view.fxml"));
         Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
@@ -963,6 +1038,11 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce la vista per la gestione delle prenotazioni
+     * @param event
+     * @throws IOException
+     */
     @FXML
     private void tornaGestioneDati(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestisci-prenotazione-view.fxml"));
@@ -973,6 +1053,12 @@ public class ControllerDipendente implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce graficamente l'annullamento di una prenotazione a seconda della risposta ottenuta dal model.
+     * @param e
+     * @param idPrenotazione
+     * @throws SQLException
+     */
     private void updateRinunciaPrenotazioni(ActionEvent e, String idPrenotazione) throws SQLException {
         PrenotazioniAttive.setExpanded(false);
         scrollPanePP.setContent(null);
@@ -984,6 +1070,12 @@ public class ControllerDipendente implements Initializable {
         aggiornaDB();
     }
 
+    /**
+     * Gestisce graficamente la fine di una prenotazione a seconda della risposta ottenuta dal model.
+     * @param e
+     * @param idPrenotazione
+     * @throws SQLException
+     */
     private void updateTerminaPrenotazioni(ActionEvent e, String idPrenotazione) throws SQLException {
         PrenotazioniAttive.setExpanded(false);
         scrollPanePP.setContent(null);
@@ -995,6 +1087,10 @@ public class ControllerDipendente implements Initializable {
         aggiornaDB();
     }
 
+    /**
+     * Aggiorna la vista delle prenotazioni.
+     * @throws SQLException
+     */
     @FXML
     private void aggiornaDB() throws SQLException {
         ResultSet rs = this.model.showPrenotazioniOdierne(LocalDate.now());
@@ -1002,46 +1098,10 @@ public class ControllerDipendente implements Initializable {
         showResults(rs);
     }
 
-    /*
-    private void showPassaportiCittadino() throws SQLException {
-        ResultSet rs = this.model.getPassaportiCittadino();
-
-        if (!rs.isBeforeFirst()) { // vedo se è vuoto
-            vboxPP.getChildren().clear();
-            Label avviso = new Label("Non hai nessun passaporto per questa ricerca");
-            Line line = new Line(10, 10, 880, 10);
-
-            HBox entryBox = new HBox(avviso);
-
-            entryBox.setSpacing(10);
-            entryBox.setAlignment(Pos.CENTER);
-            entryBox.setSnapToPixel(true);
-            vboxPP.getChildren().addAll(entryBox, line);
-        } else {
-            while (rs.next()) {
-                vboxPP.getChildren().clear();
-                HBox entryBox = new HBox();
-                Line line = new Line(10, 10, 890, 10);
-                Label numero = new Label("Numero: " + rs.getString("numero"));
-                Label tipo = new Label("Tipo: " + rs.getString("tipo"));
-                Label scadenza = new Label("Scadenza: " + rs.getString("dataScadenza"));
-                Label stato = new Label("Stato: " + rs.getString("stato"));
-                Label idRL = new Label("ID rilascio: " + rs.getInt("IDrilascio"));
-                Label idRT = new Label("ID ritiro: " + rs.getInt("IDritiro"));
-
-                entryBox.getChildren().addAll(numero, tipo, scadenza, stato, idRL, idRT);
-
-                entryBox.setSpacing(15);
-                entryBox.setAlignment(Pos.CENTER);
-                entryBox.setSnapToPixel(true);
-                vboxPP.getChildren().addAll(entryBox, line);
-            }
-            scrollPanePP.setContent(vboxPP);
-        }
-    }
-
+    /**
+     * Gestisce graficamente i passaporti presenti del cittadino a seconda della risposta ottenuta dal model.
+     * @throws SQLException
      */
-
     private void showPassaportiCittadino() throws SQLException {
         List<Passaporto> passports = this.model.getPassaportiCittadino();
 
@@ -1079,12 +1139,9 @@ public class ControllerDipendente implements Initializable {
                     }
 
                     entryBox.getChildren().addAll(numero, tipo, scadenza, stato, disattiva);
-
                     entryBox.setSpacing(15);
                     entryBox.setAlignment(Pos.CENTER);
                     entryBox.setSnapToPixel(true);
-
-
 
                     disattiva.setOnAction(e->{
                         try {
@@ -1107,6 +1164,9 @@ public class ControllerDipendente implements Initializable {
         }
     }
 
+    /**
+     * Alert per la disattivazione del passaporto.
+     */
     private void startDisattivaAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1115,6 +1175,10 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Gestisce graficamente l'inserimento di un nuovo dipendente a seconda dei dati ottenuti dal model e dall'interazione con l'utente.
+     * @param event
+     */
     @FXML
     void nuovoDipendente(ActionEvent event) {
         buttonGeneraMatricolaNuovoDipendente.setVisible(true);
@@ -1207,63 +1271,11 @@ public class ControllerDipendente implements Initializable {
         });
     }
 
-    /*
-        void apriDipendentiPresenti(MouseEvent event) throws SQLException {
-            ResultSet rs = this.model.getDipendentiSede();
-            vboxPaneDipendenti.getChildren().clear();
-
-            while(rs.next()){
-                HBox entryBox = new HBox();
-
-                String matricola = rs.getString("matricola");
-                String nomeD = rs.getString("nome");
-                String cognomeD = rs.getString("cognome");
-                String contrattoD = rs.getString("contratto");
-                String sedeD = rs.getString("sedeLavoro");
-                String tel = rs.getString("telUfficio");
-                String mail = rs.getString("email");
-
-                Label mat = new Label("Matricola: "+matricola);
-                Label nome = new Label("Nome: "+nomeD);
-                Label cognome = new Label("Cognome: "+cognomeD);
-                Label contratto = new Label("Tipologia contratto: "+contrattoD);
-                Label sede = new Label("Sede numero: "+sedeD);
-                Label telefono = new Label("Numero aziendale: "+tel);
-                Label email = new Label("E-mail aziendale: "+mail);
-
-                mat.setWrapText(true);
-                mat.setMaxWidth(150);
-                nome.setWrapText(true);
-                nome.setMaxWidth(150);
-                cognome.setWrapText(true);
-                cognome.setMaxWidth(150);
-                contratto.setWrapText(true);
-                contratto.setMaxWidth(150);
-                sede.setWrapText(true);
-                sede.setMaxWidth(150);
-                telefono.setWrapText(true);
-                telefono.setMaxWidth(150);
-                email.setWrapText(true);
-                email.setMaxWidth(150);
-                Line line = new Line(10, 10, 700, 10);
-
-                ChoiceBox<String> Turno = new ChoiceBox<>();
-                ObservableList<String> turno = FXCollections.observableArrayList("Mattino 9-14", "Pomeriggio 15-17", "Mattino e Pomeriggio");
-                Turno.setItems(turno);
-                DatePicker giornolavoro = new DatePicker();
-                Button confermaTurno = new Button("Inserisci Turno");
-
-                entryBox.getChildren().addAll(mat, nome, cognome, contratto, sede, telefono, email, Turno, giornolavoro, confermaTurno);
-
-                entryBox.setSpacing(20);
-                entryBox.setAlignment(Pos.BASELINE_LEFT);
-                entryBox.setSnapToPixel(true);
-                vboxPaneDipendenti.getChildren().addAll(entryBox, line); // Updated variable name
-
-            }
-            scrollPaneGestioneDipendenti.setContent(vboxPaneDipendenti);
-        }
-    */
+    /**
+     * Gestisce graficamente la presenza dei dipendenti per sede, a seconda delle informazioni ottenute dal model.
+     * @param event
+     * @throws SQLException
+     */
     void apriDipendentiPresenti(MouseEvent event) throws SQLException {
         ResultSet rs = this.model.getDipendentiSede();
         vboxPaneDipendenti.getChildren().clear();
@@ -1361,17 +1373,20 @@ public class ControllerDipendente implements Initializable {
         scrollPaneGestioneDipendenti.setContent(vboxPaneDipendenti);
     }
 
+    /**
+     * Finestra di dialogo per gestire graficamente la presenza di un turno.
+     * @param s
+     * @param opzione
+     * @return
+     */
     private int mostraOpzioniAzione(String s, String opzione) {
             // Creo la finestra di dialogo
         ChoiceDialog<String> dialog = new ChoiceDialog<>(opzione);
         dialog.setTitle("Scegli una azione");
         dialog.setHeaderText(s);
         dialog.setContentText("Opzioni:");
-
-        // Show the dialog and wait for the user's choice
         Optional<String> result = dialog.showAndWait();
 
-        // Return the index of the selected option
         if (result.isPresent()) {
             return 0;
         }
@@ -1379,6 +1394,9 @@ public class ControllerDipendente implements Initializable {
         return -1;
     }
 
+    /**
+     * Alert per l'inserimento di un id non corretto.
+     */
     private void startAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1388,6 +1406,11 @@ public class ControllerDipendente implements Initializable {
         cercaPrenotazioneField.setText("");
     }
 
+    /**
+     * Alert per segnalare la presenza del turno
+     * @param giorno
+     * @param Turno
+     */
     private void startAlertTurno(String giorno, String Turno) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1397,6 +1420,9 @@ public class ControllerDipendente implements Initializable {
         cercaPrenotazioneField.setText("");
     }
 
+    /**
+     * Alert per segnalare la mancanza di dati
+     */
     private void startSlotAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1406,6 +1432,9 @@ public class ControllerDipendente implements Initializable {
         cercaPrenotazioneField.setText("");
     }
 
+    /**
+     * Alert per segnalare la mancanza di dati nella registrazione del dipendente.
+     */
     private void startDipendenteAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1414,110 +1443,11 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
-    // lo uso per far vedere cos'ho nei filtri --> portale dipendente view, è l'accordion
-    /*
-    private void showResults(ResultSet rs) throws SQLException {
-        VBox vboxpattive = new VBox();
-        vboxpattive.setSpacing(10);
-        vboxpattive.setPadding(new Insets(10));
-        if (!rs.isBeforeFirst() || !rs.next()) { // vedo se è vuoto
-            Label avviso = new Label("Non hai nessuna prenotazione per questa ricerca");
-            Line line = new Line(10, 10, 930, 10);
-
-            HBox entryBox = new HBox(avviso);
-
-            entryBox.setSpacing(10);
-            entryBox.setAlignment(Pos.CENTER);
-            entryBox.setSnapToPixel(true);
-            vboxpattive.getChildren().addAll(entryBox, line);
-        } else {
-            while (rs.next()) {
-                c.clear();
-                int id = rs.getInt("ID");
-                Label idLabel = new Label("ID Prenotazione: " + id);
-
-                String cfCittadino = rs.getString("CFCittadino");
-                Label CFcittadino = new Label("Codice Fiscale: " + cfCittadino);
-
-                String ora = rs.getString("ora");
-                Label Ora = new Label("Ora della prenotazione: " + ora);
-
-                String serv = rs.getString("servizio");
-                Label Serv = new Label("Servizio richiesto: " + serv);
-                String data = rs.getString("giorno");
-
-                Button gestisciButton = new Button("Prendi in carico");
-                Button dettagliP = new Button("Dettagli prenotazione");
-                String causa = rs.getString("causaRilascio");
-
-                String csede = rs.getString("città");
-                Label sede = new Label("presso " + csede);
-
-                HBox entryBox = new HBox();
-
-                Line line = new Line(10, 10, 930, 10);
-                if (rs.getString("stato").equals("Confermata")) {
-                    entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, gestisciButton);
-                } else {
-                    entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, dettagliP);
-                }
-                gestisciButton.setOnAction((e) -> {
-                    String codice_sede;
-                    try {
-                        codice_sede = this.model.getNSede(csede);
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    System.out.println(codice_sede + " " + this.model.getSedeAddetto());
-                    if(codice_sede.equals(this.model.getSedeAddetto())) {
-                        try {
-                            this.model.updateSchedaPrenotazione(String.valueOf(id));
-                            this.model.getInfoCittadino(cfCittadino);
-                        } catch (SQLException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                        Parent root = null;
-                        try {
-                            root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestisci-prenotazione-view.fxml"));
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                        Stage secondaryStage = new Stage();
-                        Scene scene2 = new Scene(root);
-                        secondaryStage.setScene(scene2);
-                        secondaryStage.setResizable(false);
-                        secondaryStage.show();
-                    } else {
-                        startAlertPrendiCarico();
-                    }
-
-                });
-                c.add(serv); //servizio c.get(0)
-                c.add(String.valueOf(id));  // id prenotazione c.get(1)
-                c.add(causa); // causale c.get(2)
-                c.add(data); // data c.get(3)
-                c.add(ora); // ora c.get(4)
-                // ho il cfCittadino
-                entryBox.setSpacing(15);
-                entryBox.setAlignment(Pos.CENTER);
-                entryBox.setSnapToPixel(true);
-                vboxpattive.getChildren().addAll(entryBox, line);
-
-                dettagliP.setOnAction(e -> {
-                    try {
-                        popUpDettagli(serv, id, cfCittadino);
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    dettagliP.setStyle("-fx-background-color: #76A997");
-                });
-            }
-            ScrollPaneAttive.setContent(vboxpattive);
-        }
-        ScrollPaneAttive.setContent(vboxpattive);
-    }
+    /**
+     * Metodo che gestisce graficamente tutte le prenotazioni (attive e passate) a seconda della risposta che riceve dal model.
+     * @param rs
+     * @throws SQLException
      */
-
     private void showResults(ResultSet rs) throws SQLException {
         VBox vboxpattive = new VBox();
         vboxpattive.setSpacing(10);
@@ -1612,6 +1542,9 @@ public class ControllerDipendente implements Initializable {
         ScrollPaneAttive.setContent(vboxpattive);
     }
 
+    /**
+     * Alert per la selezione sbagliata dell'incarico.
+     */
     private void startAlertPrendiCarico() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore!");
@@ -1620,6 +1553,13 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Pop up che mostra i dettagli di una prenotazione svolta.
+     * @param serv
+     * @param id
+     * @param cfCittadino
+     * @throws SQLException
+     */
     private void popUpDettagli(String serv, int id, String cfCittadino) throws SQLException {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Dettagli");
@@ -1659,6 +1599,14 @@ public class ControllerDipendente implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Gestisce graficamente la formattazione della prenotazione.
+     * @param serv
+     * @param id
+     * @param causa
+     * @param data
+     * @param ora
+     */
     private void setLabels(String serv, String id, String causa, String data, String ora) {
 
         labelDettPrenotazione.setVisible(true);
@@ -1679,8 +1627,4 @@ public class ControllerDipendente implements Initializable {
         }
         this.model.setCFCittadino(this.model.getCFCittadino());
     }
-
-    //---- controller slot ----
-
-
 }

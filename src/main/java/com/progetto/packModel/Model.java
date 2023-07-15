@@ -141,7 +141,7 @@ public class Model {
 
         return rs;
     }
-    
+
     /**
      * Metodo per CITTADINO e DIPENDENTE per controllare l'integrità tra username e password con i dati presenti nel DB.
      * Discrimina tra la classe Cittadino e la classe Dipendente.
