@@ -66,6 +66,11 @@ public class ControllerRegistrazione implements Initializable {
     @FXML
     TextField tessSanitaria = new TextField();
 
+    /**
+     * Gestisce graficamente l'uscita dell'utente dalla sezione di registrazione.
+     * @param eventIndietro
+     * @throws IOException
+     */
     @FXML
     void indietro(ActionEvent eventIndietro) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/first-view.fxml"));
@@ -76,6 +81,12 @@ public class ControllerRegistrazione implements Initializable {
         stage.show();
     }
 
+    /**
+     * Gestisce graficamente l'inserimento dei dati e gli alert relativi, a seconda della risposta ottenuta dal model.
+     * @param actionEvent
+     * @throws SQLException
+     * @throws NoSuchAlgorithmException
+     */
     @FXML
     void checkInputs(ActionEvent actionEvent) throws SQLException, NoSuchAlgorithmException {
         c = this.model.checkRegistrazione(nomeUtente.getText(), cognomeUtente.getText(), dataNascita.getValue(),
@@ -96,6 +107,9 @@ public class ControllerRegistrazione implements Initializable {
         }
     }
 
+    /**
+     * Alert per segnalare la presenza dell'iscrizione del cittadino
+     */
     void startCittadinoAlert() {
         Alert warningAlert = new Alert(Alert.AlertType.WARNING);
         warningAlert.setTitle("Mancata registrazione");
@@ -107,6 +121,9 @@ public class ControllerRegistrazione implements Initializable {
         gridPane.setMouseTransparent(true);
     }
 
+    /**
+     * Alert per segnalare l'assenza del cittadino dalla scheda anagrarica della questura.
+     */
     void startAnagraficaAlert() {
         Alert warningAlert = new Alert(Alert.AlertType.WARNING);
         warningAlert.setTitle("Mancata registrazione");
@@ -118,6 +135,10 @@ public class ControllerRegistrazione implements Initializable {
         gridPane.setMouseTransparent(true);
     }
 
+    /**
+     * Metodo ampio che gestisce dinamicamente la presenza dei campi non corretti e li mostra all'utente; l'output
+     * del pop-up dipende dalla risposta ottenuta dal model.
+     */
     void startAlert() {
         Alert errorAlert = new Alert(Alert.AlertType.ERROR);
         errorAlert.setTitle("Errore");
@@ -153,6 +174,9 @@ public class ControllerRegistrazione implements Initializable {
         confermabutton.setVisible(true);
     }
 
+    /**
+     * ALert per segnalare la riuscita della registrazione
+     */
     void startSuccessAlert() {
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Successo");
@@ -163,6 +187,12 @@ public class ControllerRegistrazione implements Initializable {
         gridPane.setMouseTransparent(true);
     }
 
+    /**
+     * Metodo initialize che deve essere presente per qualsiasi classe implementi initializiable.
+     * Gestisce l'inizializzazione degli elementi grafici e di altre variabili.
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<String> cat = FXCollections.observableArrayList("Cittadino italiano", "Cittadino Unione Europea (UE) e dello Spazio Economico Europeo(SEE)",
@@ -172,11 +202,17 @@ public class ControllerRegistrazione implements Initializable {
         showPwd.setOnAction(e -> checkShowPwd());
     }
 
+    /**
+     * Gestisce graficamente il cover-up della password, controllando se è stato premuto il pulsante.
+     */
     void checkShowPwd() {
         isShowPwd = !isShowPwd;
         if(isShowPwd){ showHiddenPwd();}else{ hideHiddenPwd();}
     }
 
+    /**
+     * Gestisce graficamente il cover-up della password, nascondendo l'input.
+     */
     void hideHiddenPwd() {
         hiddenTextfield.setVisible(false);
         hiddenTextfield.toBack();
@@ -185,6 +221,9 @@ public class ControllerRegistrazione implements Initializable {
         passwordUtente.setVisible(true);
     }
 
+    /**
+     * Gestisce graficamente il cover-up della password, mostrando l'input.
+     */
     private void showHiddenPwd() {
         hiddenTextfield.toFront();
         hiddenTextfield.setVisible(true);
