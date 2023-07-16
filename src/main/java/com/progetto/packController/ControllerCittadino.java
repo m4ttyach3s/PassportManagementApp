@@ -862,23 +862,20 @@ public class ControllerCittadino implements Initializable {
                                     button.setMouseTransparent(true);
                                     button.toFront();
                                     giorniRossi.add(button.getText());
-                                }
-                                if(dateC.isBefore(LocalDate.now())){
+                                } else if(dateC.isBefore(LocalDate.now())){
                                     button.setStyle("-fx-background-color: #808080; -fx-border-color: black; -fx-border-width: 1px;");
                                     button.setMouseTransparent(true);
                                     rectangle.setFill(Paint.valueOf("#808080"));
                                     button.setTextFill(Paint.valueOf("#ffffff"));
+                                    button.toFront();
+                                } else if(dateC.equals(LocalDate.now()) && slotHour.isBefore(LocalTime.now())){
+                                    button.setStyle("-fx-background-color: #808080; -fx-border-color: black; -fx-border-width: 1px;");
+                                    button.setMouseTransparent(true);
+                                    rectangle.setFill(Paint.valueOf("#808080"));
                                     button.toFront();
                                 } else {
                                     button.setStyle("-fx-background-color: #6ebf5a; -fx-border-color: black; -fx-border-width: 1px;");
                                     button.setTextFill(Paint.valueOf("#ffffff"));
-                                }
-
-                                if(dateC.equals(LocalDate.now()) && slotHour.isBefore(LocalTime.now())){
-                                    button.setStyle("-fx-background-color: #808080; -fx-border-color: black; -fx-border-width: 1px;");
-                                    button.setMouseTransparent(true);
-                                    rectangle.setFill(Paint.valueOf("#808080"));
-                                    button.toFront();
                                 }
 
                                 button.setOnMouseClicked(ex->button.setStyle("-fx-background-color: #6ebf9f; -fx-border-color: black; -fx-border-width: 1px;"));

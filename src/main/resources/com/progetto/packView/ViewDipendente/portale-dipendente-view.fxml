@@ -90,7 +90,7 @@
             <Font name="Kohinoor Devanagari Regular" size="14.0" />
          </font>
       </Label>
-      <Button fx:id="assegnaSlot" layoutX="260.0" layoutY="104.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="200.0" text="Assegna slot">
+      <Button fx:id="assegnaSlot" layoutX="260.0" layoutY="104.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="200.0" text="Inserimento slot">
          <font>
             <Font name="Kohinoor Devanagari Regular" size="14.0" />
          </font>

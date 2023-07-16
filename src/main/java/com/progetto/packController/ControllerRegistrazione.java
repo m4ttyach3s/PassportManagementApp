@@ -115,7 +115,7 @@ public class ControllerRegistrazione implements Initializable {
         warningAlert.setTitle("Mancata registrazione");
         warningAlert.setHeaderText("Dati già presenti");
         warningAlert.setContentText("Sei già iscritto al portale. Se tale informazione non dovesse essere corretta contatta la nostra mail per" +
-                " segnalare questo fatto.\n\tMail: info@info.info");
+                " segnalare questo fatto.\n\tMail: info@comune.it");
         warningAlert.showAndWait();
         confermabutton.setVisible(false);
         gridPane.setMouseTransparent(true);

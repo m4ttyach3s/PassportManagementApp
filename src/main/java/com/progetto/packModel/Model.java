@@ -223,8 +223,9 @@ public class Model {
      * Metodo per CITTADINO per ottenere le sue prenotazioni attive.
      * @return ResultSet con le prenotazioni.
      */
-    public ResultSet getPrenotazioniAttive() {
+    public ResultSet getPrenotazioniAttive() throws SQLException {
         String CF = cittadinoModel.getCodiceFiscale();
+        this.connection = connectDB.getConnection();
         String query = "SELECT \"ID\", città, giorno, ora, servizio, \"causaRilascio\", \"codSede\" " +
                 "FROM public.prenotazione, public.sede WHERE \"codSede\" = codice" +
                 " AND \"CFcittadino\" = '" + CF + "' AND stato = 'Confermata'";
@@ -234,6 +235,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -241,7 +243,8 @@ public class Model {
      * Metodo per CITTADINO per ottenere le sue prenotazioni passate.
      * @return ResultSet con le prenotazioni
      */
-    public ResultSet getPrenotazioniPassate() {
+    public ResultSet getPrenotazioniPassate() throws SQLException {
+        this.connection = connectDB.getConnection();
         String CF = cittadinoModel.getCodiceFiscale();
         String query = "SELECT \"ID\", città, giorno, ora, servizio,  \"causaRilascio\"," +
                 " \"matricolaAddetto \", stato FROM public.prenotazione, public.sede" +
@@ -253,6 +256,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -599,21 +603,21 @@ public class Model {
      * @param giornoDP
      * @return ResultSet con prenotazioni.
      */
-    public ResultSet showPrenotazioniDatePicker(String giornoDP) {
+    public ResultSet showPrenotazioniDatePicker(String giornoDP) throws SQLException {
         ResultSet rs = null;
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT \"dataOraPrenotazione\", \"ID\", \"CFcittadino\", giorno, ora, servizio, stato, città, \"matricolaAddetto \", \"causaRilascio\" " +
                     "FROM public.prenotazione INNER JOIN public.sede ON codice = \"codSede\" WHERE giorno = ? AND \"codSede\" = ? ORDER BY ora ASC";
             PreparedStatement statement = connection.prepareStatement(query);
 
             statement.setDate(1, java.sql.Date.valueOf(giornoDP));
-            // TODO
-            //  statement.setString(2, codiceSede);
             statement.setString(2, addettoModel.getCodiceSede());
             rs = statement.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -622,8 +626,9 @@ public class Model {
      * @param now
      * @return ResultSet con prenotazioni.
      */
-    public ResultSet showPrenotazioniOdierne(LocalDate now) {
+    public ResultSet showPrenotazioniOdierne(LocalDate now) throws SQLException {
         ResultSet rs = null;
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT \"dataOraPrenotazione\", \"ID\", \"CFcittadino\", giorno, ora, servizio, stato, città, \"matricolaAddetto \", \"causaRilascio\" " +
                     "FROM public.prenotazione INNER JOIN public.sede ON codice = \"codSede\" WHERE giorno = ? AND \"codSede\" = ? AND stato = 'Confermata' ORDER BY ora ASC";
@@ -635,6 +640,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -642,8 +648,9 @@ public class Model {
      * Metodo per DIPENDENTE per visualizzare tutte le prenotazioni eseguite dall'addetto che ha svolto l'accesso.
      * @return ResultSet con prenotazioni.
      */
-    public ResultSet showTuttePrenotazioni() {
+    public ResultSet showTuttePrenotazioni() throws SQLException {
         ResultSet rs = null;
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT \"dataOraPrenotazione\", \"ID\", \"CFcittadino\", giorno, ora, servizio, stato, città, \"matricolaAddetto \", \"causaRilascio\" " +
                     "FROM public.prenotazione INNER JOIN public.sede ON codice = \"codSede\" WHERE \"matricolaAddetto \" = ? ORDER BY giorno DESC, ora ASC";
@@ -653,6 +660,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -661,8 +669,9 @@ public class Model {
      * @param idInserito
      * @return ResultSet con prenotazioni.
      */
-    public ResultSet getPrenotazioniID(Integer idInserito) {
+    public ResultSet getPrenotazioniID(Integer idInserito) throws SQLException {
         ResultSet rs = null;
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT \"dataOraPrenotazione\", \"ID\", \"CFcittadino\", giorno, ora, città, servizio, stato, \"matricolaAddetto \", \"causaRilascio\", \"codSede\" " +
                     "FROM public.prenotazione INNER JOIN public.sede ON codice = \"codSede\" WHERE \"ID\" = ? ORDER BY giorno DESC, ora ASC";
@@ -673,6 +682,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
     }
 
@@ -713,7 +723,8 @@ public class Model {
      * Metodo per DIPENDENTE per aggiornare lo stato della prenotazione, ie l'addetto prende in carico la prenotazione.
      * @param idPrenotazione
      */
-    public void updateSchedaPrenotazione(String idPrenotazione) {
+    public void updateSchedaPrenotazione(String idPrenotazione) throws SQLException {
+        this.connection = connectDB.getConnection();
         try {
             String query = "UPDATE public.prenotazione SET stato = 'in Esecuzione', \"matricolaAddetto \"= ? WHERE \"ID\" = ?";
             PreparedStatement statement = connection.prepareStatement(query);
@@ -724,8 +735,23 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        connection.close();
     }
+
+    public void updatePrenotazioneNoShowUp(String idPrenotazione) throws SQLException {
+        this.connection = connectDB.getConnection();
+        try {
+            String query = "UPDATE public.prenotazione SET stato = 'Annullata' WHERE \"ID\" = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            statement.setInt(1, Integer.parseInt(idPrenotazione));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        connection.close();
+    }
+
 
     /**
      * Metodo per DIPENDENTE per mostrare tutti i passaporti posseduti dall'utente fino a quel momento.
@@ -734,7 +760,7 @@ public class Model {
      */
     public List<Passaporto> getPassaportiCittadino() throws SQLException {
         List<Passaporto> passaportiList = new ArrayList<>();
-
+        this.connection = connectDB.getConnection();
         try {
             String query = "SELECT numero, tipo, \"dataScadenza\", stato, \"IDrilascio\", \"IDritiro\" FROM public.passaporto " +
                     "WHERE \"CFcittadino\" = ? ORDER BY \"dataScadenza\" DESC";
@@ -757,6 +783,7 @@ public class Model {
             e.printStackTrace();
         }
 
+        connection.close();
         return passaportiList;
     }
 
@@ -764,7 +791,8 @@ public class Model {
      * Metodo per DIPENDENTE per aggiornare lo stato di una prenotazione quando è terminata.
      * @param idPrenotazione
      */
-    public void updateTerminePrenotazioni(String idPrenotazione) {
+    public void updateTerminePrenotazioni(String idPrenotazione) throws SQLException {
+        this.connection = connectDB.getConnection();
         try {
             String query = "UPDATE public.prenotazione SET stato = 'Terminata' WHERE \"ID\" = ?";
             PreparedStatement statement = connection.prepareStatement(query);
@@ -773,6 +801,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
 
     /**
@@ -804,7 +833,7 @@ public class Model {
      * Metodo per DIPENDENTE generare un numero di passaporto univoco per un cittadino.
      * @return String con numero generato.
      */
-    public String getNumeroPassaporto() {
+    public String getNumeroPassaporto() throws SQLException {
         String numeroGenerato = generaNumeroPassaporto();
         passaportoModel.setNumero(numeroGenerato);
         return numeroGenerato;
@@ -814,7 +843,7 @@ public class Model {
      * Metodo per DIPENDENTE che genera un nuovo numero passaporto.
      * @return String con numero generato.
      */
-    private String generaNumeroPassaporto() {
+    private String generaNumeroPassaporto() throws SQLException {
         String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         int NUM_DIGITS = 7;
 
@@ -848,7 +877,8 @@ public class Model {
      * @param numeroGenerato
      * @return #rows presenti nel DB.
      */
-    private int checkNumeriPP(String numeroGenerato) {
+    private int checkNumeriPP(String numeroGenerato) throws SQLException {
+        this.connection = connectDB.getConnection();
         int rows = 1;
         try {
             String query = "SELECT COUNT(*) FROM public.passaporto WHERE numero = ?";
@@ -863,6 +893,7 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rows;
     }
 
@@ -874,7 +905,10 @@ public class Model {
      * @param dataSC
      * @param ID
      */
-    public void insertNuovoPassaporto(String numeroPassaporto, String CFcitt, String tipoPassaporto, String dataSC, int ID) {
+    public void insertNuovoPassaporto(String numeroPassaporto, String CFcitt, String tipoPassaporto, String dataSC, int ID) throws SQLException {
+
+        this.connection = connectDB.getConnection();
+
         passaportoModel.setNumero(numeroPassaporto);
         passaportoModel.setCfCittadino(CFcitt);
         passaportoModel.setTipo(tipoPassaporto);
@@ -895,6 +929,8 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        connection.close();
     }
 
     /**
@@ -902,7 +938,8 @@ public class Model {
      * @param numPPR
      * @param IDPP
      */
-    public void updateRitiroPP(String numPPR, int IDPP) {
+    public void updateRitiroPP(String numPPR, int IDPP) throws SQLException {
+        this.connection = connectDB.getConnection();
         String query = "UPDATE public.passaporto SET \"IDritiro\" = ?, stato='ATTIVO' WHERE numero = ?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -912,13 +949,15 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
     }
 
     /**
      * Metodo per DIPENDENTE per vedere i passaporti dell'utente in stato di processo.
      * @return ResultSet con passaporti.
      */
-    public ResultSet getPassaportiCittadinoRitiro() {
+    public ResultSet getPassaportiCittadinoRitiro() throws SQLException {
+        this.connection = connectDB.getConnection();
         ResultSet rs = null;
         try {
             String query = "SELECT numero, tipo, \"dataScadenza\", \"CFcittadino\" FROM public.passaporto " +
@@ -929,8 +968,8 @@ public class Model {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        connection.close();
         return rs;
-
     }
 
     /**
@@ -1825,9 +1864,15 @@ public class Model {
      */
     public void setCoda(String servPP, String numSedePP, String value, Timestamp timeStamp) throws SQLException {
         this.connection = connectDB.getConnection();
+        int anno = 1900;
+        int mese = 01;
+        int giorno = 01;
+
+        LocalDate defaultDate = LocalDate.of(anno, mese, giorno);
+
         String query = "INSERT INTO public.prenotazione(" +
-                "\"dataOraPrenotazione\", \"CFcittadino\", \"codSede\", servizio, stato, \"causaRilascio\") " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "\"dataOraPrenotazione\", \"CFcittadino\", \"codSede\", servizio, stato, \"causaRilascio\", giorno, ora) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         String substring = getCausaRilascio(value);
 
@@ -1839,6 +1884,8 @@ public class Model {
             statement.setString(4, servPP);
             statement.setString(5, "in coda");
             statement.setString(6, substring);
+            statement.setDate(7, java.sql.Date.valueOf(defaultDate));
+            statement.setObject(8, java.sql.Time.valueOf("00:00:00"));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

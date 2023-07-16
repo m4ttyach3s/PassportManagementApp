@@ -32,7 +32,7 @@ public class ControllerCittadinoTest {
         assertFalse(mockModel.checkLogin(codiceFiscale, password, "addetto"));
 
         String codiceFiscaleN = "DVDFCC01D23M150F";
-        String passwordN = "Ciao123Ciao!";
+        String passwordN = "Ciao123Ciao!!";
 
         assertTrue(mockModel.checkLogin(codiceFiscaleN, passwordN, "cittadino"));
         assertFalse(mockModel.checkLogin(codiceFiscaleN, passwordN, "addetto"));
@@ -55,7 +55,7 @@ public class ControllerCittadinoTest {
         String nuovaPassword = "Ciao123Ciao!";
         String enPassword = "52cafe4c5d2e7325d37553b520db4ec27121aa71e702602702486e8d645f8f456840920e949e83698736aee2ab459673291428635c0647dd0ec0cbc4a64dffa4";
         assertTrue(mockModel.checkPassword(newPassword));
-        assertTrue(mockModel.checkPassword(enPassword));
+        assertFalse(mockModel.checkPassword(enPassword));
 
         String nP = "";
         String enPP = "";

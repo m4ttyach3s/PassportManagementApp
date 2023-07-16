@@ -343,7 +343,12 @@ public class ControllerDipendente implements Initializable {
         datePicker.setOnAction((e) -> {
             LocalDate selectedDate = datePicker.getValue();
             if (selectedDate != null) {
-                ResultSet rs = this.model.showPrenotazioniDatePicker(selectedDate.toString());
+                ResultSet rs = null;
+                try {
+                    rs = this.model.showPrenotazioniDatePicker(selectedDate.toString());
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
                 try {
                     showResults(rs);
                 } catch (SQLException ex) {
@@ -355,7 +360,12 @@ public class ControllerDipendente implements Initializable {
         });
 
         secondaScelta.setOnAction((e) -> {
-            ResultSet rs = this.model.showPrenotazioniOdierne(LocalDate.now());
+            ResultSet rs = null;
+            try {
+                rs = this.model.showPrenotazioniOdierne(LocalDate.now());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             try {
                 showResults(rs);
             } catch (SQLException ex) {
@@ -367,7 +377,12 @@ public class ControllerDipendente implements Initializable {
         });
 
         terzaScelta.setOnAction((e) -> {
-            ResultSet rs = this.model.showTuttePrenotazioni();
+            ResultSet rs = null;
+            try {
+                rs = this.model.showTuttePrenotazioni();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             try {
                 showResults(rs);
             } catch (SQLException ex) {
@@ -381,7 +396,12 @@ public class ControllerDipendente implements Initializable {
             if (cercaPrenotazioneField.getText().equals(null) || cercaPrenotazioneField.getText().equals("")) {
                 startAlert();
             } else {
-                ResultSet rs = this.model.getPrenotazioniID(Integer.parseInt(cercaPrenotazioneField.getText()));
+                ResultSet rs = null;
+                try {
+                    rs = this.model.getPrenotazioniID(Integer.parseInt(cercaPrenotazioneField.getText()));
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
                 try {
                     showResults(rs);
                 } catch (SQLException ex) {
@@ -469,7 +489,11 @@ public class ControllerDipendente implements Initializable {
         dataScadenzaPP.setText(this.model.getDataScadenza());
 
         generaNumeroPassaporto.setOnAction(e -> {
-            numero_pp = this.model.getNumeroPassaporto();
+            try {
+                numero_pp = this.model.getNumeroPassaporto();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             numeroPassaporto.setText(numero_pp);
             generaNumeroPassaporto.toBack();
             generaNumeroPassaporto.setMouseTransparent(true);
@@ -509,7 +533,11 @@ public class ControllerDipendente implements Initializable {
         terminaPPR.setOpacity(0.5);
 
         ritiroPPR.setOnAction(e -> {
-            this.model.updateRitiroPP(numPPR.getText(), Integer.parseInt(c.get(1)));
+            try {
+                this.model.updateRitiroPP(numPPR.getText(), Integer.parseInt(c.get(1)));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             ritiroPPR.setMouseTransparent(true);
             ritiroPPR.setOpacity(0.5);
             indietroPPR.setMouseTransparent(true);
@@ -520,7 +548,11 @@ public class ControllerDipendente implements Initializable {
         });
 
         terminaPPR.setOnAction(e -> {
-            this.model.updateTerminePrenotazioni((c.get(1)));
+            try {
+                this.model.updateTerminePrenotazioni((c.get(1)));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             ((Node) (e.getSource())).getScene().getWindow().hide();
             try {
                 aggiornaDB();
@@ -1020,6 +1052,8 @@ public class ControllerDipendente implements Initializable {
             alert.setContentText("Operazione completata con successo! Il turno di lavoro è stato cancellato.");
         } else if(tipo.equals("disattivazione passaporto")){
             alert.setContentText("Operazione completata con successo! Il passaporto è stato disattivato.");
+        } else if(tipo.equals("prenotazione annullata")){
+            alert.setContentText("Operazione completata con successo! La prenotazione è stata annullata.");
         }
         alert.showAndWait();
     }
@@ -1448,6 +1482,7 @@ public class ControllerDipendente implements Initializable {
      * @param rs
      * @throws SQLException
      */
+    /*
     private void showResults(ResultSet rs) throws SQLException {
         VBox vboxpattive = new VBox();
         vboxpattive.setSpacing(10);
@@ -1527,6 +1562,122 @@ public class ControllerDipendente implements Initializable {
                         startAlertPrendiCarico();
                     }
                 });
+
+                dettagliP.setOnAction(e -> {
+                    try {
+                        popUpDettagli(serv, id, cfCittadino);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    dettagliP.setStyle("-fx-background-color: #76A997");
+                });
+            }
+            ScrollPaneAttive.setContent(vboxpattive);
+        }
+        ScrollPaneAttive.setContent(vboxpattive);
+    }
+*/
+    private void showResults(ResultSet rs) throws SQLException {
+        VBox vboxpattive = new VBox();
+        vboxpattive.setSpacing(10);
+        vboxpattive.setPadding(new Insets(10));
+        if (!rs.isBeforeFirst()) { // vedo se è vuoto
+            Label avviso = new Label("Non hai nessuna prenotazione per questa ricerca");
+            Line line = new Line(10, 10, 930, 10);
+
+            HBox entryBox = new HBox(avviso);
+
+            entryBox.setSpacing(10);
+            entryBox.setAlignment(Pos.CENTER);
+            entryBox.setSnapToPixel(true);
+            vboxpattive.getChildren().addAll(entryBox, line);
+        } else {
+            while (rs.next()) {
+                c.clear();
+                int id = rs.getInt("ID");
+                Label idLabel = new Label("ID Prenotazione: " + id);
+
+                String cfCittadino = rs.getString("CFCittadino");
+                Label CFcittadino = new Label("Codice Fiscale: " + cfCittadino);
+
+                String ora = rs.getString("ora");
+                Label Ora = new Label("Ora della prenotazione: " + ora);
+
+                String serv = rs.getString("servizio");
+                Label Serv = new Label("Servizio richiesto: " + serv);
+                String data = rs.getString("giorno");
+
+                Button gestisciButton = new Button("Prendi in carico");
+                Button annullaButton = new Button("Annulla");
+                Button dettagliP = new Button("Dettagli prenotazione");
+                String causa = rs.getString("causaRilascio");
+
+                String csede = rs.getString("città");
+                Label sede = new Label("presso " + csede);
+
+                HBox entryBox = new HBox();
+
+                Line line = new Line(10, 10, 930, 10);
+                if (rs.getString("stato").equals("Confermata")) {
+                    entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, gestisciButton, annullaButton);
+                } else {
+                    entryBox.getChildren().addAll(idLabel, CFcittadino, Ora, Serv, sede, dettagliP);
+                }
+
+                gestisciButton.setOnAction((e) -> {
+                    String codice_sede;
+                    try {
+                        codice_sede = this.model.getNSede(csede);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    System.out.println(codice_sede + " " + this.model.getSedeAddetto());
+                    if(codice_sede.equals(this.model.getSedeAddetto())) {
+                        try {
+                            this.model.updateSchedaPrenotazione(String.valueOf(id));
+                            this.model.getInfoCittadino(cfCittadino);
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Parent root = null;
+                        try {
+                            root = FXMLLoader.load(getClass().getResource("/com/progetto/packView/ViewDipendente/gestisci-prenotazione-view.fxml"));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Stage secondaryStage = new Stage();
+                        Scene scene2 = new Scene(root);
+                        secondaryStage.setScene(scene2);
+                        secondaryStage.setResizable(false);
+                        secondaryStage.show();
+                    } else {
+                        startAlertPrendiCarico();
+                        annullaButton.setMouseTransparent(true);
+                        annullaButton.setOpacity(0.5);
+                        gestisciButton.setOpacity(0.5);
+                        gestisciButton.setMouseTransparent(true);
+                    }
+
+                });
+                annullaButton.setOnAction((e)->{
+                    try {
+                        this.model.updatePrenotazioneNoShowUp(String.valueOf(id));
+                        this.model.getInfoCittadino(cfCittadino);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    startSuccessAlert("prenotazione annullata");
+                });
+                c.add(serv); //servizio c.get(0)
+                c.add(String.valueOf(id));  // id prenotazione c.get(1)
+                c.add(causa); // causale c.get(2)
+                c.add(data); // data c.get(3)
+                c.add(ora); // ora c.get(4)
+                // ho il cfCittadino
+                entryBox.setSpacing(15);
+                entryBox.setAlignment(Pos.CENTER);
+                entryBox.setSnapToPixel(true);
+                vboxpattive.getChildren().addAll(entryBox, line);
 
                 dettagliP.setOnAction(e -> {
                     try {

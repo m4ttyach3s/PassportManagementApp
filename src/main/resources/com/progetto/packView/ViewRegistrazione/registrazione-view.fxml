@@ -155,15 +155,11 @@
                <font>
                   <Font name="Kohinoor Devanagari Regular" size="13.0" />
                </font></Label>
-            <Label prefHeight="17.0" prefWidth="307.0" text=" almeno 10 caratteri e contenere un numero e un" textFill="#757575" GridPane.columnIndex="1" GridPane.rowIndex="9">
+            <Label alignment="TOP_RIGHT" contentDisplay="TOP" prefHeight="17.0" prefWidth="242.0" text="maiuscola e un carattere" textFill="#757575" GridPane.rowIndex="10">
                <font>
                   <Font name="Kohinoor Devanagari Regular" size="13.0" />
                </font></Label>
-            <Label alignment="TOP_RIGHT" contentDisplay="TOP" prefHeight="17.0" prefWidth="242.0" text="carattere speciale" textFill="#757575" GridPane.rowIndex="10">
-               <font>
-                  <Font name="Kohinoor Devanagari Regular" size="13.0" />
-               </font></Label>
-            <Label prefHeight="17.0" prefWidth="302.0" text=" tra @!'&quot;£$%&amp;/()=|#[]" textFill="#757575" GridPane.columnIndex="1" GridPane.rowIndex="10">
+            <Label prefHeight="17.0" prefWidth="302.0" text=" speciale tra @!'&quot;£$%&amp;/()=|#[]" textFill="#757575" GridPane.columnIndex="1" GridPane.rowIndex="10">
                <font>
                   <Font name="Kohinoor Devanagari Regular" size="13.0" />
                </font></Label>
@@ -172,6 +168,11 @@
                   <Font name="Kohinoor Devanagari Regular" size="13.0" />
                </font></Label>
             <ChoiceBox fx:id="choiceBox" accessibleText="Scelta" prefHeight="26.0" prefWidth="309.0" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+            <Label prefHeight="19.0" prefWidth="305.0" text=" almeno 10 caratteri e contenere una lettera" textAlignment="CENTER" textFill="#757575" GridPane.columnIndex="1" GridPane.rowIndex="9">
+               <font>
+                  <Font name="Kohinoor Devanagari Regular" size="13.0" />
+               </font>
+            </Label>
          </children>
          <padding>
             <Insets bottom="-20.0" left="10.0" right="10.0" top="10.0" />
